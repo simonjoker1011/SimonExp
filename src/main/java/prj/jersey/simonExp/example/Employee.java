@@ -1,5 +1,7 @@
 package prj.jersey.simonExp.example;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -8,7 +10,12 @@ import javax.persistence.Table;
 
 @Entity
 @Table
-public class Employee {
+public class Employee implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    final static public String EntityName = "Employee";
+
     @Id
     @GeneratedValue
     private Long id;
