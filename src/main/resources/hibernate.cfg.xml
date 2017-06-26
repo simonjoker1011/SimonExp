@@ -17,5 +17,6 @@
 		<property name="current_session_context_class">thread</property>
 		<mapping class="prj.jersey.simonExp.example.Employee"/>
 		<mapping class="prj.jersey.simonExp.example.Department"/>
+		<mapping class="prj.jersey.simonExp.data.Lottery539Record"/>
 	</session-factory>
 </hibernate-configuration>
