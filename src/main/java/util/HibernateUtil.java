@@ -147,30 +147,35 @@ public class HibernateUtil {
         return rtnList;
     }
 
-    public static int basicUpdate(String entityName, HashMap<String, Object> setMap, HashMap<String, Object> whereMap) {
+    public static void basicUpdate(String entityName, Object obj) {
         Session session = null;
         Transaction tx = null;
-
-        String setString = "";
-        String whereString = "";
         try {
-            for (String k : setMap.keySet()) {
-                setString += (k + " = :" + k);
-            }
-            for (String k : whereMap.keySet()) {
-                whereString += (k + " = :" + k);
-            }
             session = getHibernateSession();
-            tx = session.getTransaction();
+            tx = session.beginTransaction();
+            session.update(entityName, obj);
+            // session.update(entityName, obj);
+            session.getTransaction().commit();
+            // tx.commit();
+            // session.flush();
+        } catch (Exception e) {
+            // TODO: handle exception
+        } finally {
+            if (session != null) {
+                // session.flush();
+                session.close();
+            }
+        }
+    }
 
-            String queryString = "UPDATE " + entityName + " SET " + setString + " WHERE " + whereString;
-
-            System.out.println(queryString);
-
-            Query<Object> qry = session.createQuery(queryString);
-            setMap.forEach((k, v) -> qry.setParameter(k, v));
-            whereMap.forEach((k, v) -> qry.setParameter(k, v));
-            return qry.executeUpdate();
+    public static void basicDelete(String entityName, Object obj) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = getHibernateSession();
+            tx = session.beginTransaction();
+            session.delete(entityName, obj);
+            session.getTransaction().commit();
         } catch (Exception e) {
             // TODO: handle exception
         } finally {
@@ -178,10 +183,5 @@ public class HibernateUtil {
                 session.close();
             }
         }
-        return 0;
-    }
-
-    public static void basicDelete() {
-
     }
 }

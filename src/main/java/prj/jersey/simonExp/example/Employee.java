@@ -2,6 +2,7 @@ package prj.jersey.simonExp.example;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -9,7 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "Employee")
 public class Employee implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,14 +19,22 @@ public class Employee implements Serializable {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "name")
     private String name;
 
     @ManyToOne
     private Department department;
 
     public Employee() {
+    }
+
+    public Employee(Long id, String name, Department department) {
+        this.id = id;
+        this.name = name;
+        this.department = department;
     }
 
     public Employee(String name, Department department) {

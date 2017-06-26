@@ -3,6 +3,7 @@ package prj.jersey.simonExp.example;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -68,21 +69,32 @@ public class MyResource {
         System.out.println(HibernateUtil.basicRead(Employee.EntityName, params));
     }
 
-    @Path("testHibernateUpdate/{id}")
+    @Path("testHibernateUpdate/{id}/{name}")
     @PUT
-    public void testHibernateUpdate(@PathParam("id") Long id) {
+    public void testHibernateUpdate(
+        @PathParam("id") Long id,
+        @PathParam("name") String name) {
         System.out.println(HibernateUtil.basicRead(Employee.EntityName));
 
         System.out.println("find for id: " + id);
 
-        System.out.println(HibernateUtil.basicReadById(Employee.class, id));
+        Employee employee = (Employee) HibernateUtil.basicReadById(Employee.class, id);
+        System.out.println(employee);
 
-        HashMap<String, Object> setMap = new HashMap<>();
-        setMap.put("name", "Simoooooon");
-        HashMap<String, Object> whereMap = new HashMap<>();
-        whereMap.put("id", id);
-        System.out.println(HibernateUtil.basicUpdate(Employee.EntityName, setMap, whereMap));
+        employee.setName(name);
+        HibernateUtil.basicUpdate(Employee.EntityName, employee);
 
         System.out.println(HibernateUtil.basicReadById(Employee.class, id));
+    }
+
+    @Path("testHibernateDelete/{id}")
+    @DELETE
+    public void testHibernateDelete(@PathParam("id") Long id) {
+        System.out.println(HibernateUtil.basicRead(Employee.EntityName));
+        System.out.println("find for id: " + id);
+        Employee employee = (Employee) HibernateUtil.basicReadById(Employee.class, id);
+
+        System.out.println("delete id: " + id);
+        HibernateUtil.basicDelete(Employee.EntityName, employee);
     }
 }
