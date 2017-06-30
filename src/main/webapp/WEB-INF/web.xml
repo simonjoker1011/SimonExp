@@ -11,7 +11,7 @@
         </init-param>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>prj.jersey.simonExp.lottery539</param-value>
+            <param-value>prj.jersey.simonExp.example</param-value>
         </init-param>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
@@ -22,5 +22,18 @@
     <servlet-mapping>
         <servlet-name>Jersey Web Application</servlet-name>
         <url-pattern>/webapi/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>Lottery Servlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+           <param-name>jersey.config.server.provider.packages</param-name>
+           <param-value>prj.jersey.simonExp.lottery539</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Lottery Servlet</servlet-name>
+        <url-pattern>/lottery/*</url-pattern>
     </servlet-mapping>
 </web-app>

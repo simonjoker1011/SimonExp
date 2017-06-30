@@ -1,7 +1,10 @@
 package prj.jersey.simonExp.example;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.hibernate.Session;
 
+import enums.CurrencyType;
 import util.HibernateUtil;
 
 @Path("jerseyExample")
@@ -27,6 +31,20 @@ public class MyResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getIt() {
+        List<Locale> localeList = Arrays.asList(Locale.getAvailableLocales());
+        List<Locale> sortedLocale = localeList.stream().sorted(
+            (L1, L2) -> L1.getCountry().compareTo(L2.getCountry()))
+            .collect(Collectors.toList());
+        for (Locale locale : sortedLocale) {
+            System.out.println(
+                locale.getCountry() + " " +
+                    locale.getDisplayCountry() + " " +
+                    locale.getLanguage());
+        }
+
+        System.out.println();
+        System.out.println(CurrencyType.THB);
+
         return "Got it!";
     }
 
