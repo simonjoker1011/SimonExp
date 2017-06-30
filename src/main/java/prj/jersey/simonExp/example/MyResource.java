@@ -1,5 +1,8 @@
 package prj.jersey.simonExp.example;
 
+import java.io.File;
+import java.io.FileReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +16,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
+
+import com.opencsv.CSVReader;
 
 import enums.CurrencyType;
 import util.HibernateUtil;
@@ -45,6 +52,28 @@ public class MyResource {
         System.out.println();
         System.out.println(CurrencyType.THB);
 
+        return "Got it!";
+    }
+
+    @GET
+    @Path("getfile")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getFileTest(
+        @QueryParam("urlString") String urlString) {
+
+        CSVReader reader = null;
+        File file = new File("csvfile");
+        try {
+            URL url = new URL(urlString);
+            FileUtils.copyURLToFile(url, file);
+            reader = new CSVReader(new FileReader(file));
+            String[] line;
+            while ((line = reader.readNext()) != null) {
+                System.out.println(Arrays.toString(line));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "Got it!";
     }
 
