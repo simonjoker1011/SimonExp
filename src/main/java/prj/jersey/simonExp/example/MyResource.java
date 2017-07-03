@@ -61,6 +61,9 @@ public class MyResource {
     public String getFileTest(
         @QueryParam("urlString") String urlString) {
 
+        System.out.println("\nget file from:");
+        System.out.println(urlString + "\n");
+
         CSVReader reader = null;
         File file = new File("csvfile");
         try {
@@ -74,6 +77,22 @@ public class MyResource {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return "Got it!";
+    }
+
+    @GET
+    @Path("getCurrency")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testCurrencyType() {
+
+        CurrencyType[] currArr = { CurrencyType.AUD, CurrencyType.CAD, CurrencyType.CHF, CurrencyType.EUR, CurrencyType.GBP, CurrencyType.HKD, CurrencyType.IDR, CurrencyType.JPY,
+            CurrencyType.KRW, CurrencyType.MYR, CurrencyType.NZD, CurrencyType.PHP, CurrencyType.SEK, CurrencyType.SGD, CurrencyType.THB, CurrencyType.TWD, CurrencyType.USD,
+            CurrencyType.ZAR };
+
+        for (CurrencyType e : currArr) {
+            System.out.println(e.getCurrencyCode() + ": " + e.getCurrencyName());
+        }
+
         return "Got it!";
     }
 
