@@ -18,12 +18,14 @@ import org.apache.commons.io.FileUtils;
 
 import com.opencsv.CSVReader;
 
-import enums.CurrencyType;
 import prj.jersey.simonExp.datas.CurrencyData;
+import prj.jersey.simonExp.enums.CurrencyType;
+import util.HibernateUtil;
 
 @Path("CurrencyResource")
 public class CurrencyResource {
     private static final String botcsvUrl = "http://rate.bot.com.tw/xrt/flcsv/0/";
+    private static final String[] reportColName = { "Currency", "Rate", "Cash", "Spot" };
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -60,7 +62,8 @@ public class CurrencyResource {
                     if ("Can not find any data for this inquiry".equals(Arrays.toString(line))) {
                         return "No datas for date: " + dateFromUrl;
                     }
-
+                    // hardcode for BOM issue
+                    line[0] = line[0].substring(1);
                     for (int i = 0; i < line.length - 1; i++) {
                         switch (line[i]) {
                             case "Currency":
@@ -92,14 +95,16 @@ public class CurrencyResource {
                         }
                     }
                 } else {
-                    CurrencyData buyingCash = CurrencyData(
-                        Integer.parseInt(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                    CurrencyData buyingCash = new CurrencyData(
+                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
                         line[buyingIdx],
                         "Cash",
                         new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
                         line[currNameIdx],
                         Float.parseFloat(line[buyingCashIdx]),
                         urlString);
+
+                    HibernateUtil.basicCreate(buyingCash);
                     // CurrencyData buyingSpot = new CurrencyData();
                     // CurrencyData sellingCash = new CurrencyData();
                     // CurrencyData sellingSpot = new CurrencyData();
@@ -119,6 +124,6 @@ public class CurrencyResource {
         // http://rate.bot.com.tw/xrt/flcsv/0/2000-12-29?Lang=en-US
         String[] urlArr = url.split("/");
 
-        return urlArr[urlArr.length - 1].split("?")[0];
+        return urlArr[urlArr.length - 1].split("\\?")[0];
     }
 }

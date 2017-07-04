@@ -24,7 +24,9 @@ import org.hibernate.Session;
 
 import com.opencsv.CSVReader;
 
-import enums.CurrencyType;
+import prj.jersey.simonExp.datas.Department;
+import prj.jersey.simonExp.datas.Employee;
+import prj.jersey.simonExp.enums.CurrencyType;
 import util.HibernateUtil;
 
 @Path("jerseyExample")

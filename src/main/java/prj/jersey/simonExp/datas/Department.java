@@ -1,4 +1,4 @@
-package prj.jersey.simonExp.example;
+package prj.jersey.simonExp.datas;
 
 import java.util.ArrayList;
 import java.util.List;

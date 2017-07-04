@@ -4,8 +4,8 @@
   'http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd'>
 <hibernate-configuration>
 	<session-factory>
-		<property name="connection.url">jdbc:mysql://simonjokerrds.c4coyvtxdjue.us-west-2.rds.amazonaws.com:3306/test</property>
-		<property name="connection.username">simonjoker</property>
+		<property name="connection.url">jdbc:mysql://localhost:3306/test</property>
+		<property name="connection.username">simonhuang</property>
 		<property name="connection.password">b952040034</property>
 		<property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
 		<property name="dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
@@ -15,8 +15,10 @@
 		<!-- JDBC connection pool (use the built-in) -->
 		<property name="connection.pool_size">5</property>
 		<property name="current_session_context_class">thread</property>
-		<mapping class="prj.jersey.simonExp.example.Employee"/>
-		<mapping class="prj.jersey.simonExp.example.Department"/>
-		<mapping class="prj.jersey.simonExp.data.Lottery539Record"/>
+		<mapping class="prj.jersey.simonExp.datas.Employee"/>
+		<mapping class="prj.jersey.simonExp.datas.Department"/>
+		<mapping class="prj.jersey.simonExp.datas.Lottery539Data"/>
+		<mapping class="prj.jersey.simonExp.datas.CurrencyData"/>
+
 	</session-factory>
 </hibernate-configuration>

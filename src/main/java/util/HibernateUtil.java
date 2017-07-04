@@ -44,8 +44,9 @@ public class HibernateUtil {
         Transaction tx = null;
         try {
             session = getHibernateSession();
-            tx = session.getTransaction();
+            session.beginTransaction();
             session.save(obj);
+            tx = session.getTransaction();
             tx.commit();
         } catch (Exception e) {
             if (tx != null)
