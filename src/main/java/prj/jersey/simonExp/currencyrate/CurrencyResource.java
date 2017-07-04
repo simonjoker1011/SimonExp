@@ -103,11 +103,35 @@ public class CurrencyResource {
                         line[currNameIdx],
                         Float.parseFloat(line[buyingCashIdx]),
                         urlString);
+                    CurrencyData buyingSpot = new CurrencyData(
+                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        line[buyingIdx],
+                        "Spot",
+                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        line[currNameIdx],
+                        Float.parseFloat(line[buyingSpotIdx]),
+                        urlString);
+                    CurrencyData sellingCash = new CurrencyData(
+                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        line[sellingIdx],
+                        "Cash",
+                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        line[currNameIdx],
+                        Float.parseFloat(line[sellingCashIdx]),
+                        urlString);
+                    CurrencyData sellingSpot = new CurrencyData(
+                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        line[sellingIdx],
+                        "Spot",
+                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        line[currNameIdx],
+                        Float.parseFloat(line[sellingSpotIdx]),
+                        urlString);
 
                     HibernateUtil.basicCreate(buyingCash);
-                    // CurrencyData buyingSpot = new CurrencyData();
-                    // CurrencyData sellingCash = new CurrencyData();
-                    // CurrencyData sellingSpot = new CurrencyData();
+                    HibernateUtil.basicCreate(buyingSpot);
+                    HibernateUtil.basicCreate(sellingCash);
+                    HibernateUtil.basicCreate(sellingSpot);
                 }
 
                 count++;
