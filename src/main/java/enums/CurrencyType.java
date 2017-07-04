@@ -37,4 +37,13 @@ public enum CurrencyType {
     public String getCurrencyName() {
         return currencyName;
     }
+
+    public static String getCurrencyCodeByName(String name) throws Exception {
+        for (CurrencyType c : CurrencyType.values()) {
+            if (c.getCurrencyName().equals(name)) {
+                return c.getCurrencyCode();
+            }
+        }
+        throw new Exception();
+    }
 }

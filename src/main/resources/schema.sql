@@ -1,3 +1,17 @@
+	drop table if exists CurrencyRate;
+
+	create table CurrencyRate (
+	   currCode INTEGER(3),    
+       rate VARCHAR(20),
+       cashspot VARCHAR(20),
+       rateDate DATE,
+       currName VARCHAR(20),
+       price FLOAT(10,5),
+       fetchUrl VARCHAR(200),
+       PRIMARY KEY(currCode, rate, cashspot, rateDate)
+	);
+	
+	
 	drop table if exists Department;
 
 	create table Department (

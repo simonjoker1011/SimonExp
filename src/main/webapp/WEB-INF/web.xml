@@ -9,14 +9,6 @@
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>prj.jersey.simonExp.example</param-value>
         </init-param>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>prj.jersey.simonExp.example</param-value>
-        </init-param>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>prj.jersey.simonExp.util</param-value>
-        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
@@ -35,5 +27,18 @@
     <servlet-mapping>
         <servlet-name>Lottery Servlet</servlet-name>
         <url-pattern>/lottery/*</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>Currency Servlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+           <param-name>jersey.config.server.provider.packages</param-name>
+           <param-value>prj.jersey.simonExp.currencyrate</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Currency Servlet</servlet-name>
+        <url-pattern>/currency/*</url-pattern>
     </servlet-mapping>
 </web-app>

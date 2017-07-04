@@ -1,4 +1,4 @@
-package prj.jersey.simonExp.data;
+package prj.jersey.simonExp.datas;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-public class Lottery539Record implements Serializable {
+public class Lottery539Data implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

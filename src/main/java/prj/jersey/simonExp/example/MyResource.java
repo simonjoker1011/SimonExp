@@ -96,6 +96,14 @@ public class MyResource {
         return "Got it!";
     }
 
+    @Path("testCurrency")
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testCurrency() {
+
+        return "Done";
+    }
+
     @Path("testHibernate")
     @POST
     @Produces(MediaType.TEXT_PLAIN)
