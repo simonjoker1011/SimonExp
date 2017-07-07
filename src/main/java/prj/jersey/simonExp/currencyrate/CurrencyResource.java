@@ -5,9 +5,11 @@ import java.io.FileReader;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
+import javax.persistence.PersistenceException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,6 +17,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.opencsv.CSVReader;
 
@@ -25,6 +30,7 @@ import util.HibernateUtil;
 @Path("CurrencyResource")
 public class CurrencyResource {
     private static final String botcsvUrl = "http://rate.bot.com.tw/xrt/flcsv/0/";
+    private static final String postfixLang = "?Lang=en-US";
     private static final String[] reportColName = { "Currency", "Rate", "Cash", "Spot" };
 
     @POST
@@ -35,10 +41,40 @@ public class CurrencyResource {
         System.out.println("\nget file from:");
         System.out.println(urlString + "\n");
 
+        return fetchNprocessCsvFile(urlString);
+    }
+
+    @POST
+    @Path("savePeriodCurrency")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String savePeriodCurrency(
+        @QueryParam("startdate") String startDate,
+        @QueryParam("enddate") String endDate) throws ParseException {
+
+        LocalDate start = strToDate(startDate);
+        LocalDate end = strToDate(endDate);
+
+        for (LocalDate date = start; date.isBefore(end.plusDays(1)); date = date.plusDays(1)) {
+            System.out.println("import file: " + dateToStr(date));
+            fetchNprocessCsvFile(botcsvUrl + dateToStr(date) + postfixLang);
+        }
+        return "Done";
+    }
+
+    private LocalDate strToDate(String dateStr) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+        return dateTimeFormatter.parseLocalDate(dateStr);
+    }
+
+    private String dateToStr(LocalDate date) {
+        return date.toString(DateTimeFormat.forPattern("yyyy-MM-dd"));
+    }
+
+    private String fetchNprocessCsvFile(String fileUrl) {
         CSVReader reader = null;
         File file = new File("csvfile");
         try {
-            URL url = new URL(urlString);
+            URL url = new URL(fileUrl);
             FileUtils.copyURLToFile(url, file);
             reader = new CSVReader(new FileReader(file));
             String[] line;
@@ -54,10 +90,9 @@ public class CurrencyResource {
             Integer sellingSpotIdx = -1;
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String dateFromUrl = parseDateOnUrl(urlString);
+            String dateFromUrl = parseDateOnUrl(fileUrl);
 
             while ((line = reader.readNext()) != null) {
-                System.out.println(Arrays.toString(line));
                 if (count == 0) {
                     if ("Can not find any data for this inquiry".equals(Arrays.toString(line))) {
                         return "No datas for date: " + dateFromUrl;
@@ -95,52 +130,64 @@ public class CurrencyResource {
                         }
                     }
                 } else {
+
+                    Integer currCode = CurrencyType.getCurrencyCodeByName(line[currNameIdx]);
+                    if (currCode == -1) {
+                        System.out.println("Do not handle currency: " + line[currNameIdx]);
+                        count++;
+                        continue;
+                    }
+
                     CurrencyData buyingCash = new CurrencyData(
-                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        currCode,
                         line[buyingIdx],
                         "Cash",
                         new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
                         line[currNameIdx],
                         Float.parseFloat(line[buyingCashIdx]),
-                        urlString);
+                        fileUrl);
                     CurrencyData buyingSpot = new CurrencyData(
-                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        currCode,
                         line[buyingIdx],
                         "Spot",
                         new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
                         line[currNameIdx],
                         Float.parseFloat(line[buyingSpotIdx]),
-                        urlString);
+                        fileUrl);
                     CurrencyData sellingCash = new CurrencyData(
-                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        currCode,
                         line[sellingIdx],
                         "Cash",
                         new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
                         line[currNameIdx],
                         Float.parseFloat(line[sellingCashIdx]),
-                        urlString);
+                        fileUrl);
                     CurrencyData sellingSpot = new CurrencyData(
-                        Integer.valueOf(CurrencyType.getCurrencyCodeByName(line[currNameIdx])),
+                        currCode,
                         line[sellingIdx],
                         "Spot",
                         new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
                         line[currNameIdx],
                         Float.parseFloat(line[sellingSpotIdx]),
-                        urlString);
+                        fileUrl);
 
-                    HibernateUtil.basicCreate(buyingCash);
-                    HibernateUtil.basicCreate(buyingSpot);
-                    HibernateUtil.basicCreate(sellingCash);
-                    HibernateUtil.basicCreate(sellingSpot);
+                    try {
+                        HibernateUtil.basicCreate(buyingCash);
+                        HibernateUtil.basicCreate(buyingSpot);
+                        HibernateUtil.basicCreate(sellingCash);
+                        HibernateUtil.basicCreate(sellingSpot);
+                    } catch (PersistenceException e) {
+                        if (e.getMessage().equals("org.hibernate.exception.ConstraintViolationException: could not execute statement")) {
+                            System.out.println("Create fail for " + line[currNameIdx]);
+                        }
+                    }
                 }
-
                 count++;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return "Done";
+        return "Process file from " + fileUrl + " is done";
     }
 
     private String parseDateOnUrl(String url) {
