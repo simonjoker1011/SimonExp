@@ -1,6 +1,6 @@
-	drop table if exists CurrencyRate;
+	drop table if exists CurrencyData;
 
-	create table CurrencyRate (
+	create table CurrencyData (
        id INTEGER NOT NULL,
 	   currCode INTEGER(3),    
        rate VARCHAR(20),

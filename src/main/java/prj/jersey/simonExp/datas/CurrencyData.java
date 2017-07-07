@@ -10,12 +10,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "CurrencyRate")
+@Table(name = "CurrencyData")
 public class CurrencyData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    final static public String EntityName = "CurrencyRate";
+    final static public String EntityName = "CurrencyData";
 
     @Id
     @GeneratedValue

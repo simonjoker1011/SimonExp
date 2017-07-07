@@ -10,6 +10,11 @@ strategy api
 lottery api
 
 
+ISSUES to fix:
+
+1. json support
+2. query dateString convert
+
 APIs:
 
 fetch someday currency: 

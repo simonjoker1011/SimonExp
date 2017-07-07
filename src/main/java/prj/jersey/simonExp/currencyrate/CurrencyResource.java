@@ -7,16 +7,21 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.persistence.PersistenceException;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Session;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -32,6 +37,58 @@ public class CurrencyResource {
     private static final String botcsvUrl = "http://rate.bot.com.tw/xrt/flcsv/0/";
     private static final String postfixLang = "?Lang=en-US";
     private static final String[] reportColName = { "Currency", "Rate", "Cash", "Spot" };
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetchCurrency(
+        @QueryParam("CurrencyName") String CurrencyName,
+        @QueryParam("Rate") String Rate,
+        @QueryParam("CashSpot") String CashSpot,
+        @QueryParam("StartDate") String StartDate,
+        @QueryParam("EndDate") String EndDate) {
+
+        System.out.println("------------------------------> Start");
+
+        List<CurrencyData> currList = new ArrayList<>();
+
+        Session session = null;
+        String queryString =
+            "FROM " + CurrencyData.EntityName +
+                " c WHERE c.currName = :CurrencyName"
+                + " AND c.rate = :rate"
+                + " AND c.cashspot = :cashspot"
+        // + " AND c.rateDate > :StartDate"
+        // + " AND :EndDate > c.rateDate"
+        ;
+        try {
+            session = HibernateUtil.getHibernateSession();
+            // Query qry = session.createQuery(queryString);
+            // qry.setParameter("CurrencyName", CurrencyName);
+            // qry.setParameter("rate", Rate);
+            // qry.setParameter("cashspot", CashSpot);
+            // qry.setParameter("StartDate", StartDate);
+            // qry.setParameter("EndDate", EndDate);
+
+            currList = session.createQuery(queryString)
+                .setParameter("CurrencyName", CurrencyName)
+                .setParameter("rate", Rate)
+                .setParameter("cashspot", CashSpot)
+                // .setParameter("StartDate", StartDate)
+                // .setParameter("EndDate", EndDate)
+                .list();
+
+            System.out.println("-----> " + currList.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return Response.ok().entity(currList).build();
+    }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -95,7 +152,7 @@ public class CurrencyResource {
             while ((line = reader.readNext()) != null) {
                 if (count == 0) {
                     if ("Can not find any data for this inquiry".equals(Arrays.toString(line))) {
-                        return "No datas for date: " + dateFromUrl;
+                        System.out.println("No datas for date: " + dateFromUrl);
                     }
                     // hardcode for BOM issue
                     line[0] = line[0].substring(1);
