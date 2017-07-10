@@ -1,6 +1,9 @@
 TODO:
 
-0. 
+
+0.
+add curr type: gold
+ 
 basic js restapi usage
 
 1.
