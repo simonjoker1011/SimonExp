@@ -57,24 +57,19 @@ public class CurrencyResource {
                 " c WHERE c.currName = :CurrencyName"
                 + " AND c.rate = :rate"
                 + " AND c.cashspot = :cashspot"
-        // + " AND c.rateDate > :StartDate"
-        // + " AND :EndDate > c.rateDate"
-        ;
+                + " AND c.rateDate >= :StartDate"
+                + " AND :EndDate >= c.rateDate";
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             session = HibernateUtil.getHibernateSession();
-            // Query qry = session.createQuery(queryString);
-            // qry.setParameter("CurrencyName", CurrencyName);
-            // qry.setParameter("rate", Rate);
-            // qry.setParameter("cashspot", CashSpot);
-            // qry.setParameter("StartDate", StartDate);
-            // qry.setParameter("EndDate", EndDate);
 
             currList = session.createQuery(queryString)
                 .setParameter("CurrencyName", CurrencyName)
                 .setParameter("rate", Rate)
                 .setParameter("cashspot", CashSpot)
-                // .setParameter("StartDate", StartDate)
-                // .setParameter("EndDate", EndDate)
+                .setParameter("StartDate", simpleDateFormat.parse(StartDate))
+                .setParameter("EndDate", simpleDateFormat.parse(EndDate))
                 .list();
 
             System.out.println("-----> " + currList.size());
