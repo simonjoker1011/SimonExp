@@ -5,6 +5,8 @@
 
 <svg width="960" height="500"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
 <script>
 
 // var svg = d3.select("svg"),
@@ -60,19 +62,23 @@
 //       .attr("stroke-width", 1.5)
 //       .attr("d", line);
 // });
-function fetchApi(){
-    var xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Buying&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-02-01", false);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    xhttp.send();
-    var response = JSON.parse(xhttp.responseText);
-}
+$(document).ready(function() {
+    $.ajax({
+        url: "http://rest-service.guides.spring.io/greeting"
+    }).then(function(data) {
+       $('.greeting-id').append(data.id);
+       $('.greeting-content').append(data.content);
+    });
+});
 
 
 </script>
 </head>
 <body>
-    
+        <div>
+            <p class="greeting-id">The ID is </p>
+            <p class="greeting-content">The content is </p>
+        </div>
     <button type="submit" oneclick="fetchApi()">Hi Query</button>
 </body>
 </html>
