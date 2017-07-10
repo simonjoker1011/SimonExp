@@ -8,7 +8,25 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
 <script>
+$(document).ready(function(){
+    initSubmitForm();
+});
 
+var initSubmitForm = function() {
+    $.ajax({
+        url: 'http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Buying&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-02-01',
+        type: "GET",
+        dataType: "json",
+        complete: function(data, textStatus, jqXHR) {
+            console.log(textStatus);
+        },
+        success: function (data, textStatus, jqXHR) {
+            console.log(data);
+        }
+    });
+    
+    return false;
+};
 // var svg = d3.select("svg"),
 //     margin = {top: 20, right: 20, bottom: 30, left: 50},
 //     width = +svg.attr("width") - margin.left - margin.right,
@@ -62,20 +80,14 @@
 //       .attr("stroke-width", 1.5)
 //       .attr("d", line);
 // });
-$(document).ready(function() {
-    $.ajax({
-        url: "http://rest-service.guides.spring.io/greeting"
-    }).then(function(data) {
-       $('.greeting-id').append(data.id);
-       $('.greeting-content').append(data.content);
-    });
-});
 
 
 </script>
 </head>
 <body>
         <div>
+            <p class="currency">The currName is </p>
+
             <p class="greeting-id">The ID is </p>
             <p class="greeting-content">The content is </p>
         </div>
