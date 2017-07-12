@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.opencsv.CSVReader;
 
 import prj.jersey.simonExp.datas.CurrencyConfig;
 import prj.jersey.simonExp.datas.CurrencyData;
+import prj.jersey.simonExp.datas.CurrencyInfo;
 import prj.jersey.simonExp.enums.CurrencyType;
 import util.HibernateUtil;
 import util.TimeUtil;
@@ -56,7 +56,6 @@ public class CurrencyResource {
                 + " AND c.rateDate >= :StartDate"
                 + " AND :EndDate >= c.rateDate";
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             session = HibernateUtil.getHibernateSession();
 
@@ -64,8 +63,8 @@ public class CurrencyResource {
                 .setParameter("CurrencyName", CurrencyName)
                 .setParameter("rate", Rate)
                 .setParameter("cashspot", CashSpot)
-                .setParameter("StartDate", simpleDateFormat.parse(StartDate))
-                .setParameter("EndDate", simpleDateFormat.parse(EndDate))
+                .setParameter("StartDate", TimeUtil.strToDate(StartDate))
+                .setParameter("EndDate", TimeUtil.strToDate(EndDate))
                 .list();
         } catch (Exception e) {
             e.printStackTrace();
@@ -164,17 +163,46 @@ public class CurrencyResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateHistory(
         @QueryParam("CurrencyName") String CurrencyName,
-        @QueryParam("startdate") String startDate,
-        @QueryParam("enddate") String endDate) {
+        @QueryParam("BaseDate") String BaseDate) {
 
-        // 2. query for extreme value
+        Session session = null;
+        session = HibernateUtil.getHibernateSession();
 
-        LocalDate start = TimeUtil.strToDate(startDate);
-        LocalDate end = TimeUtil.strToDate(endDate);
+        LocalDate baseLine = TimeUtil.strToDate(BaseDate);
+        LocalDate weekLine = new LocalDate(baseLine).minusWeeks(1);
+        LocalDate monthLine = new LocalDate(baseLine).minusMonths(1);
+        LocalDate seasonLine = new LocalDate(baseLine).minusMonths(3);
+        LocalDate halfYearLine = new LocalDate(baseLine).minusMonths(6);
+        LocalDate yearLine = new LocalDate(baseLine).minusYears(1);
+        LocalDate fourYearLine = new LocalDate(baseLine).minusYears(4);
+        LocalDate decadeLine = new LocalDate(baseLine).minusYears(10);
 
-        for (LocalDate date = start; date.isBefore(end.plusDays(1)); date = date.plusDays(1)) {
-            System.out.println("processing: " + TimeUtil.dateToStr(date));
-        }
+        System.out.println(TimeUtil.dateToStr(baseLine));
+        System.out.println(TimeUtil.dateToStr(weekLine));
+        System.out.println(TimeUtil.dateToStr(monthLine));
+        System.out.println(TimeUtil.dateToStr(seasonLine));
+        System.out.println(TimeUtil.dateToStr(halfYearLine));
+        System.out.println(TimeUtil.dateToStr(yearLine));
+        System.out.println(TimeUtil.dateToStr(fourYearLine));
+        System.out.println(TimeUtil.dateToStr(decadeLine));
+
+        CurrencyInfo buyingCash = new CurrencyInfo();
+        CurrencyInfo buyingSpot = new CurrencyInfo();
+        CurrencyInfo SellingCash = new CurrencyInfo();
+        CurrencyInfo SellingSpot = new CurrencyInfo();
+
+        // try {
+        // System.out.println("Max date: " + TimeUtil.timestampToStr((Timestamp) session.createQuery("SELECT MAX(rateDate) FROM
+        // " + CurrencyData.EntityName).getSingleResult()));
+        // session.createQuery("SELECT MAX(rateDate) FROM " + CurrencyData.EntityName).getSingleResult();
+        // } catch (Exception e) {
+        // if (session != null) {
+        // session.close();
+        // }
+        // e.printStackTrace();
+        // return "Failed";
+        // }
+
         return "Done";
     }
 
