@@ -2,95 +2,38 @@
 <html lang="en">
 
 <head>
-
-<svg width="960" height="500"></svg>
+<meta charset="UTF-8">
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-<script>
-$(document).ready(function(){
-    initSubmitForm();
-});
-
-var initSubmitForm = function() {
-    $.ajax({
-        url: 'http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Buying&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-02-01',
-        type: "GET",
-        dataType: "json",
-        complete: function(data, textStatus, jqXHR) {
-            console.log(textStatus);
-        },
-        success: function (data, textStatus, jqXHR) {
-            console.log(data);
-        }
-    });
-    
-    return false;
-};
-// var svg = d3.select("svg"),
-//     margin = {top: 20, right: 20, bottom: 30, left: 50},
-//     width = +svg.attr("width") - margin.left - margin.right,
-//     height = +svg.attr("height") - margin.top - margin.bottom,
-//     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-// var parseTime = d3.timeParse("%d-%b-%y");
-
-// var x = d3.scaleTime()
-//     .rangeRound([0, width]);
-
-// var y = d3.scaleLinear()
-//     .rangeRound([height, 0]);
-
-// var line = d3.line()
-//     .x(function(d) { return x(d.date); })
-//     .y(function(d) { return y(d.close); });
-
-// d3.tsv("data.tsv", function(d) {
-//   d.date = parseTime(d.date);
-//   d.close = +d.close;
-//   return d;
-// }, function(error, data) {
-//   if (error) throw error;
-
-//   x.domain(d3.extent(data, function(d) { return d.date; }));
-//   y.domain(d3.extent(data, function(d) { return d.close; }));
-
-//   g.append("g")
-//       .attr("transform", "translate(0," + height + ")")
-//       .call(d3.axisBottom(x))
-//     .select(".domain")
-//       .remove();
-
-//   g.append("g")
-//       .call(d3.axisLeft(y))
-//     .append("text")
-//       .attr("fill", "#000")
-//       .attr("transform", "rotate(-90)")
-//       .attr("y", 6)
-//       .attr("dy", "0.71em")
-//       .attr("text-anchor", "end")
-//       .text("Price ($)");
-
-//   g.append("path")
-//       .datum(data)
-//       .attr("fill", "none")
-//       .attr("stroke", "steelblue")
-//       .attr("stroke-linejoin", "round")
-//       .attr("stroke-linecap", "round")
-//       .attr("stroke-width", 1.5)
-//       .attr("d", line);
-// });
-
-
-</script>
 </head>
-<body>
-        <div>
-            <p class="currency">The currName is </p>
+    <body>
 
-            <p class="greeting-id">The ID is </p>
-            <p class="greeting-content">The content is </p>
-        </div>
-    <button type="submit" oneclick="fetchApi()">Hi Query</button>
-</body>
+    <h1>Hello</h1>
+        
+    <script type="text/javascript">
+        var svg_width=500;
+        var svg_height=200;
+
+        var dataset =[30,20,10,40,45,25,15,35,18]
+
+        var svg = d3.select("body").append("svg").attr("width",svg_width).attr("height",svg_height);
+
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("x",function(d,i){
+                return i * (svg_width/dataset.length);
+            })
+            .attr("y",function(d){
+                return svg_height-(d*4);
+            })
+            .attr("width",svg_width/dataset.length)
+            .attr("height",function(d){
+                return d*4;
+            })
+    </script>
+
+    </body>
 </html>
