@@ -19,6 +19,8 @@
 		<mapping class="prj.jersey.simonExp.datas.Department"/>
 		<mapping class="prj.jersey.simonExp.datas.Lottery539Data"/>
 		<mapping class="prj.jersey.simonExp.datas.CurrencyData"/>
+		<mapping class="prj.jersey.simonExp.datas.CurrencyInfo"/>
+		<mapping class="prj.jersey.simonExp.datas.CurrencyConfig"/>
 
 	</session-factory>
 </hibernate-configuration>

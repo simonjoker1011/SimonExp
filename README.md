@@ -2,6 +2,8 @@ TODO:
 
 
 0.
+history/period highest/lowest api/schema
+
 add curr type: gold
  
 basic js restapi usage

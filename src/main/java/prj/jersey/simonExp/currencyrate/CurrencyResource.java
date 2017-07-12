@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,14 +22,14 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import com.opencsv.CSVReader;
 
+import prj.jersey.simonExp.datas.CurrencyConfig;
 import prj.jersey.simonExp.datas.CurrencyData;
 import prj.jersey.simonExp.enums.CurrencyType;
 import util.HibernateUtil;
+import util.TimeUtil;
 
 @Path("CurrencyResource")
 public class CurrencyResource {
@@ -47,10 +46,7 @@ public class CurrencyResource {
         @QueryParam("StartDate") String StartDate,
         @QueryParam("EndDate") String EndDate) {
 
-        System.out.println("------------------------------> Start");
-
         List<CurrencyData> currList = new ArrayList<>();
-
         Session session = null;
         String queryString =
             "FROM " + CurrencyData.EntityName +
@@ -71,8 +67,6 @@ public class CurrencyResource {
                 .setParameter("StartDate", simpleDateFormat.parse(StartDate))
                 .setParameter("EndDate", simpleDateFormat.parse(EndDate))
                 .list();
-
-            System.out.println("-----> " + currList.size());
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -88,12 +82,12 @@ public class CurrencyResource {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public String saveCurrency(
-        @QueryParam("urlString") String urlString) {
+        @QueryParam("fileDate") String fileDate) {
 
         System.out.println("\nget file from:");
-        System.out.println(urlString + "\n");
+        System.out.println(botcsvUrl + fileDate + postfixLang + "\n");
 
-        return fetchNprocessCsvFile(urlString);
+        return fetchNprocessCsvFile(fileDate);
     }
 
     @POST
@@ -103,28 +97,91 @@ public class CurrencyResource {
         @QueryParam("startdate") String startDate,
         @QueryParam("enddate") String endDate) throws ParseException {
 
-        LocalDate start = strToDate(startDate);
-        LocalDate end = strToDate(endDate);
+        LocalDate start = TimeUtil.strToDate(startDate);
+        LocalDate end = TimeUtil.strToDate(endDate);
 
         for (LocalDate date = start; date.isBefore(end.plusDays(1)); date = date.plusDays(1)) {
-            System.out.println("import file: " + dateToStr(date));
-            fetchNprocessCsvFile(botcsvUrl + dateToStr(date) + postfixLang);
+            System.out.println("import file: " + TimeUtil.dateToStr(date));
+            fetchNprocessCsvFile(TimeUtil.dateToStr(date));
         }
         return "Done";
     }
 
-    private LocalDate strToDate(String dateStr) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-        return dateTimeFormatter.parseLocalDate(dateStr);
+    @POST
+    @Path("updateTilToday")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateTilToday() {
+
+        Session session = null;
+        session = HibernateUtil.getHibernateSession();
+
+        // 1. updaate config
+        LocalDate today = new LocalDate();
+        CurrencyConfig config = null;
+        try {
+            config = (CurrencyConfig) session.createQuery("FROM " + CurrencyConfig.EntityName).getSingleResult();
+            System.out.println(TimeUtil.dateToStr(today) + " <-----> " + TimeUtil.timestampToStr(config.getUpdateDate()));
+            System.out.println(TimeUtil.dateToStr(today).equals(TimeUtil.timestampToStr(config.getUpdateDate())));
+
+            if (!TimeUtil.dateToStr(today).equals(TimeUtil.timestampToStr(config.getUpdateDate()))) {
+                config.setUpdateDate(new Timestamp(today.toDateTimeAtStartOfDay().getMillis()));
+                System.out.println(TimeUtil.timestampToStr(config.getUpdateDate()));
+
+                session.beginTransaction();
+                session.update(config);
+                session.getTransaction().commit();
+            }
+
+        } catch (Exception e) {
+            System.out.println("update config fail");
+            if (session != null) {
+                session.close();
+            }
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
+
+        // 2. import datas til today
+        try {
+            System.out.println("Max date: " + TimeUtil.timestampToStr((Timestamp) session.createQuery("SELECT MAX(rateDate) FROM " + CurrencyData.EntityName).getSingleResult()));
+            String fromDate = TimeUtil.timestampToStr((Timestamp) session.createQuery("SELECT MAX(rateDate) FROM " + CurrencyData.EntityName).getSingleResult());
+            String toDate = TimeUtil.dateToStr(today.minusDays(1));
+            savePeriodCurrency(fromDate, toDate);
+
+        } catch (Exception e) {
+            if (session != null) {
+                session.close();
+            }
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
+
+        return Response.ok().build();
     }
 
-    private String dateToStr(LocalDate date) {
-        return date.toString(DateTimeFormat.forPattern("yyyy-MM-dd"));
+    @POST
+    @Path("updateHistory")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String updateHistory(
+        @QueryParam("CurrencyName") String CurrencyName,
+        @QueryParam("startdate") String startDate,
+        @QueryParam("enddate") String endDate) {
+
+        // 2. query for extreme value
+
+        LocalDate start = TimeUtil.strToDate(startDate);
+        LocalDate end = TimeUtil.strToDate(endDate);
+
+        for (LocalDate date = start; date.isBefore(end.plusDays(1)); date = date.plusDays(1)) {
+            System.out.println("processing: " + TimeUtil.dateToStr(date));
+        }
+        return "Done";
     }
 
-    private String fetchNprocessCsvFile(String fileUrl) {
+    private String fetchNprocessCsvFile(String parseDate) {
         CSVReader reader = null;
         File file = new File("csvfile");
+        String fileUrl = botcsvUrl + parseDate + postfixLang;
         try {
             URL url = new URL(fileUrl);
             FileUtils.copyURLToFile(url, file);
@@ -141,13 +198,10 @@ public class CurrencyResource {
             Integer sellingCashIdx = -1;
             Integer sellingSpotIdx = -1;
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String dateFromUrl = parseDateOnUrl(fileUrl);
-
             while ((line = reader.readNext()) != null) {
                 if (count == 0) {
                     if ("Can not find any data for this inquiry".equals(Arrays.toString(line))) {
-                        System.out.println("No datas for date: " + dateFromUrl);
+                        System.out.println("No datas for date: " + parseDate);
                     }
                     // hardcode for BOM issue
                     line[0] = line[0].substring(1);
@@ -184,6 +238,7 @@ public class CurrencyResource {
                 } else {
 
                     Integer currCode = CurrencyType.getCurrencyCodeByName(line[currNameIdx]);
+                    Timestamp rateDate = TimeUtil.strToTimestamp(parseDate);
                     if (currCode == -1) {
                         System.out.println("Do not handle currency: " + line[currNameIdx]);
                         count++;
@@ -194,7 +249,7 @@ public class CurrencyResource {
                         currCode,
                         line[buyingIdx],
                         "Cash",
-                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        rateDate,
                         line[currNameIdx],
                         Float.parseFloat(line[buyingCashIdx]),
                         fileUrl);
@@ -202,7 +257,7 @@ public class CurrencyResource {
                         currCode,
                         line[buyingIdx],
                         "Spot",
-                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        rateDate,
                         line[currNameIdx],
                         Float.parseFloat(line[buyingSpotIdx]),
                         fileUrl);
@@ -210,7 +265,7 @@ public class CurrencyResource {
                         currCode,
                         line[sellingIdx],
                         "Cash",
-                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        rateDate,
                         line[currNameIdx],
                         Float.parseFloat(line[sellingCashIdx]),
                         fileUrl);
@@ -218,7 +273,7 @@ public class CurrencyResource {
                         currCode,
                         line[sellingIdx],
                         "Spot",
-                        new Timestamp(dateFormat.parse(dateFromUrl).getTime()),
+                        rateDate,
                         line[currNameIdx],
                         Float.parseFloat(line[sellingSpotIdx]),
                         fileUrl);
@@ -240,13 +295,5 @@ public class CurrencyResource {
             e.printStackTrace();
         }
         return "Process file from " + fileUrl + " is done";
-    }
-
-    private String parseDateOnUrl(String url) {
-        // url format:
-        // http://rate.bot.com.tw/xrt/flcsv/0/2000-12-29?Lang=en-US
-        String[] urlArr = url.split("/");
-
-        return urlArr[urlArr.length - 1].split("\\?")[0];
     }
 }
