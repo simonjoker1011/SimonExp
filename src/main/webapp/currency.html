@@ -9,35 +9,28 @@
       google.charts.setOnLoadCallback(drawChart);
       
     function drawChart() {
-    //   var jsonData = $.ajax({
-    //       url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Buying&CashSpot=Spot&StartDate=2017-07-05&EndDate=2017-07-10",
-    //       dataType: "json",
-    //       async: false
-    //       }).responseText;
+      var jsonData = $.ajax({
+          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Selling&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-01-31",
+          dataType: "json",
+          async: false
+          }).responseJSON;
 
 
-      var jsonData = [{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499230800000,"currName":"USD","price":30.445,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-05?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499317200000,"currName":"USD","price":30.525,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-06?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499403600000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-07?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499662800000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-10?Lang=en-US"}];
+      // var jsonData = [{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499230800000,"currName":"USD","price":30.445,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-05?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499317200000,"currName":"USD","price":30.525,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-06?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499403600000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-07?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499662800000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-10?Lang=en-US"}];
 
-
-      for(data in jsonData){
-        console.log("Hi");
-        console.log(data);
-        console.log(jsonData[data].price);
-
-      }
 
       var data = new google.visualization.DataTable();
 
-      data.addColumn('datetime', 'Date');
+      data.addColumn('date', 'Date');
       data.addColumn('number', 'Price');
+
       var dataSet = [];
 
-     for(data in jsonData){
-        console.log(jsonData[data].rateDate);
-
-        dataSet.push([jsonData[data].rateDate, jsonData[data].price]);
+     for(datas in jsonData){
+        dataSet.push([new Date(jsonData[datas].rateDate), jsonData[datas].price]);
       }
-        data.push(dataSet);
+
+      data.addRows(dataSet);
 
 
       // data.addColumn('number', 'Day');
