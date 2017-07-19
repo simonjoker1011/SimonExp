@@ -63,8 +63,8 @@ public class CurrencyResource {
                 .setParameter("CurrencyName", CurrencyName)
                 .setParameter("rate", Rate)
                 .setParameter("cashspot", CashSpot)
-                .setParameter("StartDate", TimeUtil.strToDate(StartDate))
-                .setParameter("EndDate", TimeUtil.strToDate(EndDate))
+                .setParameter("StartDate", TimeUtil.strToTimestamp(StartDate))
+                .setParameter("EndDate", TimeUtil.strToTimestamp(EndDate))
                 .list();
         } catch (Exception e) {
             e.printStackTrace();
