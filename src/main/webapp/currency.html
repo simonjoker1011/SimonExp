@@ -11,7 +11,7 @@
     function drawChart() {
       var dateAnchor = Date.now(); 
       var yesterday = new Date(dateAnchor - 1000 * 60 * 60 * 24 );
-      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * 30);
+      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * 7);
       var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
       var startDate = String(AboveSevenDays.getFullYear()).concat('-',String(AboveSevenDays.getMonth()+1),'-',String(AboveSevenDays.getDate()));
       var defaultCurrName = 'USD';

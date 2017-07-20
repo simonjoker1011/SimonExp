@@ -13,6 +13,15 @@ import javax.persistence.Table;
 @Table(name = "CurrencyInfo")
 public class CurrencyInfo implements Serializable {
 
+    public CurrencyInfo(Integer currCode, String rate, String cashspot, String currName, Timestamp dateBase) {
+        super();
+        this.currCode = currCode;
+        this.rate = rate;
+        this.cashspot = cashspot;
+        this.currName = currName;
+        this.dateBase = dateBase;
+    }
+
     private static final long serialVersionUID = 1L;
 
     final static public String EntityName = "CurrencyInfo";
@@ -58,6 +67,10 @@ public class CurrencyInfo implements Serializable {
     private Float monthHigh;
     @Column(name = "monthLow")
     private Float monthLow;
+    @Column(name = "weekHigh")
+    private Float weekHigh;
+    @Column(name = "weekLow")
+    private Float weekLow;
 
     @Column(name = "dateBase")
     private Timestamp dateBase;
@@ -223,6 +236,22 @@ public class CurrencyInfo implements Serializable {
 
     public void setMonthLow(Float monthLow) {
         this.monthLow = monthLow;
+    }
+
+    public Float getWeekHigh() {
+        return weekHigh;
+    }
+
+    public void setWeekHigh(Float weekHigh) {
+        this.weekHigh = weekHigh;
+    }
+
+    public Float getWeekLow() {
+        return weekLow;
+    }
+
+    public void setWeekLow(Float weekLow) {
+        this.weekLow = weekLow;
     }
 
 }

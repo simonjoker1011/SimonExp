@@ -169,6 +169,48 @@ public class HibernateUtil {
         }
     }
 
+    public static void basicSaveOrUpdate(String entityName, Object obj) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = getHibernateSession();
+            tx = session.beginTransaction();
+            session.saveOrUpdate(entityName, obj);
+            // session.update(entityName, obj);
+            session.getTransaction().commit();
+            // tx.commit();
+            // session.flush();
+        } catch (Exception e) {
+            // TODO: handle exception
+        } finally {
+            if (session != null) {
+                // session.flush();
+                session.close();
+            }
+        }
+    }
+
+    public static void basicSaveOrUpdate(Object obj) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = getHibernateSession();
+            tx = session.beginTransaction();
+            session.saveOrUpdate(obj);
+            // session.update(entityName, obj);
+            session.getTransaction().commit();
+            // tx.commit();
+            // session.flush();
+        } catch (Exception e) {
+            // TODO: handle exception
+        } finally {
+            if (session != null) {
+                // session.flush();
+                session.close();
+            }
+        }
+    }
+
     public static void basicDelete(String entityName, Object obj) {
         Session session = null;
         Transaction tx = null;

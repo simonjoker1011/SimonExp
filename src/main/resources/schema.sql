@@ -31,6 +31,8 @@
        seasonLow FLOAT(10,5),
        monthHigh FLOAT(10,5),
        monthLow FLOAT(10,5),
+       weekHigh FLOAT(10,5),
+       weekLow FLOAT(10,5),
        dateBase DATE,
        PRIMARY KEY(currCode, rate, cashspot)
   );
