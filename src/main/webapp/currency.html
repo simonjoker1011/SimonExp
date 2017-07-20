@@ -5,19 +5,22 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript">
     
-      google.charts.load('current', {'packages':['line']});
-      google.charts.setOnLoadCallback(drawChart);
+    google.charts.load('current', {'packages':['line']});
+    google.charts.setOnLoadCallback(drawChart);
       
     function drawChart() {
+      var dateAnchor = Date.now(); 
+      var yesterday = new Date(dateAnchor - 1000 * 60 * 60 * 24 );
+      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * 30);
+      var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
+      var startDate = String(AboveSevenDays.getFullYear()).concat('-',String(AboveSevenDays.getMonth()+1),'-',String(AboveSevenDays.getDate()));
+      var defaultCurrName = 'USD';
+
       var jsonData = $.ajax({
-          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Selling&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-01-31",
+          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+defaultCurrName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
           dataType: "json",
           async: false
-          }).responseJSON;
-
-
-      // var jsonData = [{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499230800000,"currName":"USD","price":30.445,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-05?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499317200000,"currName":"USD","price":30.525,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-06?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499403600000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-07?Lang=en-US"},{"currCode":840,"rate":"Buying","cashspot":"Spot","rateDate":1499662800000,"currName":"USD","price":30.535,"fetchUrl":"http://rate.bot.com.tw/xrt/flcsv/0/2017-07-10?Lang=en-US"}];
-
+          }).responseJSON;   
 
       var data = new google.visualization.DataTable();
 
@@ -31,30 +34,6 @@
       }
 
       data.addRows(dataSet);
-
-
-      // data.addColumn('number', 'Day');
-      // data.addColumn('number', 'Guardians of the Galaxy');
-      // data.addColumn('number', 'The Avengers');
-      // data.addColumn('number', 'Transformers: Age of Extinction');
-
-      // data.addRows([
-      //   [1,  37.8, 80.8, 41.8],
-      //   [2,  30.9, 69.5, 32.4],
-      //   [3,  25.4,   57, 25.7],
-      //   [4,  11.7, 18.8, 10.5],
-      //   [5,  11.9, 17.6, 10.4],
-      //   [6,   8.8, 13.6,  7.7],
-      //   [7,   7.6, 12.3,  9.6],
-      //   [8,  12.3, 29.2, 10.6],
-      //   [9,  16.9, 42.9, 14.8],
-      //   [10, 12.8, 30.9, 11.6],
-      //   [11,  5.3,  7.9,  4.7],
-      //   [12,  6.6,  8.4,  5.2],
-      //   [13,  4.8,  6.3,  3.6],
-      //   [14,  4.2,  6.2,  3.4]
-      // ]);
-
           
       var options = {
         // chart: {
