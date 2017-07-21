@@ -6,7 +6,10 @@ history/period highest/lowest api/schema
 
 add curr type: gold
  
-
+1.
+Recommand IDEs: 
+VSCode
+Atom
 
 2.
 strategy api
