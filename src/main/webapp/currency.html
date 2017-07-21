@@ -3,21 +3,75 @@
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    
+  </head>
+
+  <body>
+
+    <form>
+      Currency:
+      <input type="radio" name="currencyName" value="USD" checked="checked" >USD
+      <input type="radio" name="currencyName" value="HKD" >HKD
+      <input type="radio" name="currencyName" value="GBP" >GBP
+      <input type="radio" name="currencyName" value="AUD" >AUD
+      <input type="radio" name="currencyName" value="CAD" >CAD
+      <input type="radio" name="currencyName" value="SGD" >SGD
+      <input type="radio" name="currencyName" value="CHF" >CHF
+      <input type="radio" name="currencyName" value="JPY" >JPY
+      <input type="radio" name="currencyName" value="ZAR" >ZAR
+      <input type="radio" name="currencyName" value="SEK" >SEK
+      <input type="radio" name="currencyName" value="NZD" >NZD
+      <input type="radio" name="currencyName" value="THB" >THB
+      <input type="radio" name="currencyName" value="PHP" >PHP
+      <input type="radio" name="currencyName" value="IDR" >IDR
+      <input type="radio" name="currencyName" value="EUR" >EUR
+      <input type="radio" name="currencyName" value="MYR" >MYR
+      <input type="radio" name="currencyName" value="KRW" >KRW
+    </form>
+    <form>
+      Period:
+      <input type="radio" name="period" value='7' >Week
+      <input type="radio" name="period" value='30' checked="checked">Month      
+      <input type="radio" name="period" value='120'>Season      
+      <input type="radio" name="period" value='180'>Half Year      
+      <input type="radio" name="period" value='365'>Year
+      <input type="radio" name="period" value='1460'>4 Years
+      <input type="radio" name="period" value='3650'>Decade
+    </form>
+
     <script type="text/javascript">
     
+    var temp = document.getElementsByName('currencyName').value;
+
+    var currName='USD';
+    var queryDays =30;
+    var cashSpot='Spot';
+    var rate='Buying'
+
+      $("input[type=radio][name=currencyName]").on("change",function(){
+        currName=$("[name=currencyName]:checked").val();        
+            google.charts.load('current', {'packages':['line']});
+            google.charts.setOnLoadCallback(drawChart);
+
+      });
+      $("input[type=radio][name=period]").on("change",function(){        
+        queryDays=$("[name=period]:checked").val();
+            google.charts.load('current', {'packages':['line']});
+            google.charts.setOnLoadCallback(drawChart);
+      });
+
     google.charts.load('current', {'packages':['line']});
     google.charts.setOnLoadCallback(drawChart);
       
     function drawChart() {
       var dateAnchor = Date.now(); 
       var yesterday = new Date(dateAnchor - 1000 * 60 * 60 * 24 );
-      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * 7);
+      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * queryDays);
       var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
       var startDate = String(AboveSevenDays.getFullYear()).concat('-',String(AboveSevenDays.getMonth()+1),'-',String(AboveSevenDays.getDate()));
-      var defaultCurrName = 'USD';
-
+    
       var jsonData = $.ajax({
-          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+defaultCurrName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
+          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
           dataType: "json",
           async: false
           }).responseJSON;   
@@ -49,11 +103,25 @@
       chart.draw(data, google.charts.Line.convertOptions(options));
     }
 
-    </script>
-  </head>
 
-  <body>
+
+    function syncHistory(){
+
+      var syncResp = $.ajax({
+                        type: "POST",
+                        url: "http://localhost:8080/simonExp/currency/CurrencyResource/updateTilToday",
+                        dataType: "json",
+                        async: false
+                      });
+    }
+
+    </script>
     <!--Div that will hold the pie chart-->
     <div id="linechart_material"></div>
+
+    <button onclick="syncHistory()">Sync History</button>
+    <p id="syncResult"></p>
+    
+
   </body>
 </html>

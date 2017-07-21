@@ -6,10 +6,7 @@ history/period highest/lowest api/schema
 
 add curr type: gold
  
-basic js restapi usage
 
-1.
-d3.js
 
 2.
 strategy api
@@ -22,6 +19,10 @@ ISSUES to fix:
 
 
 APIs:
+
+
+update util today:
+http://localhost:8080/simonExp/currency/CurrencyResource/updateTilToday
 
 query currency:
 http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName=USD&Rate=Buying&CashSpot=Spot&StartDate=2001-01-01&EndDate=2001-02-01
