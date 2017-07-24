@@ -1,39 +1,40 @@
 package util;
 
-import org.hibernate.Session;
-import org.joda.time.LocalDate;
+import javax.persistence.NoResultException;
 
-import prj.jersey.simonExp.datas.CurrencyData;
+import org.hibernate.Session;
+
 import prj.jersey.simonExp.datas.CurrencyInfo;
+import prj.jersey.simonExp.enums.CurrencyType;
 
 public class CurrencyUtil {
 
-    public static CurrencyInfo constructCurrencyInfo(String currName, LocalDate baseLine, LocalDate weekLine, LocalDate monthLine, LocalDate seasonLine, LocalDate halfYearLine,
-        LocalDate yearLine, LocalDate fourYearLine, LocalDate decadeLine) {
+    public static CurrencyInfo constructCurrencyInfo(String currName, String rate, String cashspot) {
 
-        CurrencyInfo currencyInfo = new CurrencyInfo();
+        CurrencyInfo currencyInfo = null;
         Session session = null;
         session = HibernateUtil.getHibernateSession();
 
         String queryString =
-            "FROM " + CurrencyData.EntityName +
-                " c WHERE c.currName = :CurrencyName"
+            "FROM " + CurrencyInfo.EntityName +
+                " c WHERE c.currCode = :currCode"
                 + " AND c.rate = :rate"
-                + " AND c.cashspot = :cashspot"
-                + " AND c.rateDate >= :StartDate"
-                + " AND :EndDate >= c.rateDate";
-
+                + " AND c.cashspot = :cashspot";
         try {
-
+            currencyInfo = (CurrencyInfo) session.createQuery(queryString)
+                .setParameter("currCode", CurrencyType.getCurrencyCodeByName(currName))
+                .setParameter("rate", rate)
+                .setParameter("cashspot", cashspot)
+                .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         } finally {
             if (session != null) {
                 session.close();
             }
         }
-
         return currencyInfo;
     }
 }

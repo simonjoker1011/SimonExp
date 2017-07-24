@@ -28,6 +28,7 @@ import prj.jersey.simonExp.datas.CurrencyConfig;
 import prj.jersey.simonExp.datas.CurrencyData;
 import prj.jersey.simonExp.datas.CurrencyInfo;
 import prj.jersey.simonExp.enums.CurrencyType;
+import util.CurrencyUtil;
 import util.HibernateUtil;
 import util.TimeUtil;
 
@@ -174,17 +175,16 @@ public class CurrencyResource {
             .getSingleResult();
     }
 
-    @GET
-    @Path("fetchHistory")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response fetchHistory(
-        @QueryParam("CurrencyName") String CurrencyName,
-        @QueryParam("BaseDate") String BaseDate) throws ParseException {
+    private CurrencyInfo constructCurrencyInfo1(String currName, String rate, String cashspot, String BaseDate) throws ParseException {
+        CurrencyInfo currencyInfo = CurrencyUtil.constructCurrencyInfo(currName, rate, cashspot);
+        if (currencyInfo == null) {
+            currencyInfo = new CurrencyInfo(CurrencyType.getCurrencyCodeByName(currName), rate, cashspot, currName, TimeUtil.strToTimestamp(BaseDate));
+        }
+        currencyInfo.setDateBase(TimeUtil.strToTimestamp(BaseDate));
+        return currencyInfo;
+    }
 
-        Session session = null;
-        session = HibernateUtil.getHibernateSession();
-
-        LocalDate baseLine = TimeUtil.strToDate(BaseDate);
+    private void constructCurrencyInfo2(Session session, CurrencyInfo currencyInfo, String rate, String cashspot, LocalDate baseLine) throws ParseException {
         LocalDate weekLine = new LocalDate(baseLine).minusWeeks(1);
         LocalDate monthLine = new LocalDate(baseLine).minusMonths(1);
         LocalDate seasonLine = new LocalDate(baseLine).minusMonths(3);
@@ -192,145 +192,87 @@ public class CurrencyResource {
         LocalDate yearLine = new LocalDate(baseLine).minusYears(1);
         LocalDate fourYearLine = new LocalDate(baseLine).minusYears(4);
         LocalDate decadeLine = new LocalDate(baseLine).minusYears(10);
+        String CurrencyName = currencyInfo.getCurrName();
 
-        CurrencyInfo buyingCash = new CurrencyInfo(CurrencyType.getCurrencyCodeByName(CurrencyName), "Buying", "Cash", CurrencyName, TimeUtil.strToTimestamp(BaseDate));
-        CurrencyInfo buyingSpot = new CurrencyInfo(CurrencyType.getCurrencyCodeByName(CurrencyName), "Buying", "Spot", CurrencyName, TimeUtil.strToTimestamp(BaseDate));
-        CurrencyInfo SellingCash = new CurrencyInfo(CurrencyType.getCurrencyCodeByName(CurrencyName), "Selling", "Cash", CurrencyName, TimeUtil.strToTimestamp(BaseDate));
-        CurrencyInfo SellingSpot = new CurrencyInfo(CurrencyType.getCurrencyCodeByName(CurrencyName), "Selling", "Spot", CurrencyName, TimeUtil.strToTimestamp(BaseDate));
+        currencyInfo.setWeekHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setWeekLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setMonthHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setMonthLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setSeasonHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setSeasonLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setHalfYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setHalfYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setFourYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setFourYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setDecadeHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setDecadeLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setHistoryHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+        currencyInfo.setHistoryLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, rate, cashspot,
+            TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+    }
+
+    @GET
+    @Path("fetchHistory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fetchHistory(
+        @QueryParam("CurrencyName") String CurrencyName) {
+        Session session = null;
+        session = HibernateUtil.getHibernateSession();
+
+        String queryString = "FROM " + CurrencyInfo.EntityName + " WHERE currName = :currName";
+
+        return Response.ok(session.createQuery(queryString)
+            .setParameter("currName", CurrencyName).list()).build();
+    }
+
+    @POST
+    @Path("updateHistory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateHistory(
+        @QueryParam("CurrencyName") String CurrencyName,
+        @QueryParam("BaseDate") String BaseDate) throws ParseException {
+
+        Session session = null;
+        session = HibernateUtil.getHibernateSession();
+
+        LocalDate baseLine = TimeUtil.strToDate(BaseDate);
+
+        CurrencyInfo buyingCash = constructCurrencyInfo1(CurrencyName, "Buying", "Cash", BaseDate);
+        CurrencyInfo buyingSpot = constructCurrencyInfo1(CurrencyName, "Buying", "Spot", BaseDate);
+        CurrencyInfo SellingCash = constructCurrencyInfo1(CurrencyName, "Selling", "Cash", BaseDate);
+        CurrencyInfo SellingSpot = constructCurrencyInfo1(CurrencyName, "Selling", "Spot", BaseDate);
 
         try {
-            // Buying Cash
-            buyingCash.setWeekHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setWeekLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setMonthHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setMonthLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setSeasonHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setSeasonLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setHalfYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setHalfYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setFourYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setFourYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setDecadeHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setDecadeLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setHistoryHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingCash.setHistoryLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Cash",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            // Selling Cash
-            SellingCash.setWeekHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setWeekLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setMonthHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setMonthLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setSeasonHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setSeasonLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setHalfYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setHalfYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setFourYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setFourYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setDecadeHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setDecadeLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setHistoryHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingCash.setHistoryLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Cash",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            // Buying Spot
-            buyingSpot.setWeekHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setWeekLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setMonthHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setMonthLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setSeasonHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setSeasonLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setHalfYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setHalfYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setFourYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setFourYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setDecadeHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setDecadeLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setHistoryHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            buyingSpot.setHistoryLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Buying", "Spot",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            // Selling Spot
-            SellingSpot.setWeekHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setWeekLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(weekLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setMonthHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setMonthLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(monthLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setSeasonHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setSeasonLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(seasonLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setHalfYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setHalfYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(halfYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(yearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setFourYearHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setFourYearLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(fourYearLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setDecadeHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setDecadeLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(TimeUtil.dateToStr(decadeLine)), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setHistoryHigh((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Max", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
-            SellingSpot.setHistoryLow((Float) constructSqlandExecute(session, CurrencyData.EntityName, "Min", CurrencyName, "Selling", "Spot",
-                TimeUtil.strToTimestamp(beginDate), TimeUtil.strToTimestamp(TimeUtil.dateToStr(baseLine))));
+            constructCurrencyInfo2(session, buyingCash, "Buying", "Cash", baseLine);
+            constructCurrencyInfo2(session, buyingSpot, "Buying", "Spot", baseLine);
+            constructCurrencyInfo2(session, SellingCash, "Selling", "Cash", baseLine);
+            constructCurrencyInfo2(session, SellingSpot, "Selling", "Spot", baseLine);
+
+            session.beginTransaction();
+
+            session.saveOrUpdate(buyingCash);
+            session.saveOrUpdate(buyingSpot);
+            session.saveOrUpdate(SellingCash);
+            session.saveOrUpdate(SellingSpot);
+
+            session.getTransaction().commit();
         } catch (Exception e) {
             if (session != null) {
                 session.close();
