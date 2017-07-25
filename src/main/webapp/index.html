@@ -8,12 +8,44 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+              appId            : '487802971565924',
+              autoLogAppEvents : true,
+              xfbml            : true,
+              version          : 'v2.10'
+            });
+            FB.AppEvents.logPageView();
+
+            // FB.getLoginStatus(function(response) {
+            //     if (response.status === 'connected') {
+            //         console.log('Logged in.');
+            //     }
+            //     else {
+            //         FB.login();
+            //     }
+            // });
+        };
+        function facebook_test() {
+          FB.login(function(){}, {scope: 'publish_actions'});
+        };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/zh_TW/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
     <style type="text/css">
     button {
         margin-top: 1%;
         margin-bottom: 1% !important
     }
     </style>
+
 </head>
 <body style="margin:10%">
     <h2>Jersey RESTful Web Application!</h2>
@@ -28,6 +60,14 @@
             <input type="text" class="form-control" id="usr">
         </div>
     </form>
-    
+
+    <button onclick="facebook_test()">Test Fb Login</button>
+    <br>
+    <div
+      class="fb-like"
+      data-share="true"
+      data-width="450"
+      data-show-faces="true">
+    </div>
 </body>
 </html>
