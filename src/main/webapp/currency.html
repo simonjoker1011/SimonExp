@@ -47,63 +47,121 @@
 
     <script type="text/javascript">
     
-    var temp = document.getElementsByName('currencyName').value;
+    var temp = $("[name=currencyName]:checked").val();
 
     var currName='USD';
     var queryDays =30;
     var cashSpot='Spot';
-    var rate='Buying'
+    var rate='Buying';
+    var buyingMid=0, sellingMid=0;
+
 
       $("input[type=radio][name=currencyName]").on("change",function(){
-        currName=$("[name=currencyName]:checked").val();        
+        currName=$("[name=currencyName]:checked").val(); 
+        getMid(queryDays);       
             google.charts.load('current', {'packages':['line']});
             google.charts.setOnLoadCallback(drawChart);
 
       });
       $("input[type=radio][name=period]").on("change",function(){        
         queryDays=$("[name=period]:checked").val();
+        getMid(queryDays);
             google.charts.load('current', {'packages':['line']});
             google.charts.setOnLoadCallback(drawChart);
       });
 
+    getMid(queryDays);
     google.charts.load('current', {'packages':['line']});
     google.charts.setOnLoadCallback(drawChart);
-      
+    
+    function getMid(in_days){
+      var historyDatas = $.ajax({
+            url: "http://localhost:8080/simonExp/currency/CurrencyResource/fetchHistory?CurrencyName="+currName,
+            dataType: "json",
+            async: false
+          }).responseJSON;  
+
+      var buyingSpotHistory, sellingSpotHistory;
+
+      for (var data in historyDatas) {
+        if (historyDatas[data].rate == 'Buying' && historyDatas[data].cashspot == cashSpot) {
+          buyingSpotHistory=historyDatas[data];          
+        }        
+        if (historyDatas[data].rate == 'Selling' && historyDatas[data].cashspot == cashSpot) {
+          sellingSpotHistory=historyDatas[data];          
+        }     
+      }
+
+      switch(String(in_days)){
+        case '7':
+          buyingMid=(buyingSpotHistory.weekHigh+buyingSpotHistory.weekLow)/2;
+          sellingMid=(sellingSpotHistory.weekHigh+sellingSpotHistory.weekLow)/2;
+          break;
+        case '30':
+          buyingMid=(buyingSpotHistory.monthHigh+buyingSpotHistory.monthLow)/2;
+          sellingMid=(sellingSpotHistory.monthHigh+sellingSpotHistory.monthLow)/2;
+          break;  
+        case '120':
+          buyingMid=(buyingSpotHistory.seasonHigh+buyingSpotHistory.seasonLow)/2;
+          sellingMid=(sellingSpotHistory.seasonHigh+sellingSpotHistory.seasonLow)/2;
+          break;  
+        case '180':
+          buyingMid=(buyingSpotHistory.halfYearHigh+buyingSpotHistory.halfYearLow)/2;
+          sellingMid=(sellingSpotHistory.halfYearHigh+sellingSpotHistory.halfYearLow)/2;
+          break;  
+        case '365':
+          buyingMid=(buyingSpotHistory.yearHigh+buyingSpotHistory.yearLow)/2;
+          sellingMid=(sellingSpotHistory.yearHigh+sellingSpotHistory.yearLow)/2;
+          break;  
+        case '1460':
+          buyingMid=(buyingSpotHistory.fourYearHigh+buyingSpotHistory.fourYearLow)/2;
+          sellingMid=(sellingSpotHistory.fourYearHigh+sellingSpotHistory.fourYearLow)/2;
+          break;  
+        case '3650':
+          buyingMid=(buyingSpotHistory.decadeHigh+buyingSpotHistory.decadeLow)/2;
+          sellingMid=(sellingSpotHistory.decadeHigh+sellingSpotHistory.decadeLow)/2;
+          break;
+        default :
+          buyingMid=0;
+          sellingMid=0;
+          break;
+      }
+    }
+
+
     function drawChart() {
       var dateAnchor = Date.now(); 
       var yesterday = new Date(dateAnchor - 1000 * 60 * 60 * 24 );
-      var AboveSevenDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * queryDays);
+      var AboveDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * queryDays);
       var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
-      var startDate = String(AboveSevenDays.getFullYear()).concat('-',String(AboveSevenDays.getMonth()+1),'-',String(AboveSevenDays.getDate()));
+      var startDate = String(AboveDays.getFullYear()).concat('-',String(AboveDays.getMonth()+1),'-',String(AboveDays.getDate()));
     
       var buyingData = $.ajax({
-          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
-          dataType: "json",
-          async: false
+            url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
+            dataType: "json",
+            async: false
           }).responseJSON;   
 
       var sellingData = $.ajax({
-          url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
-          dataType: "json",
-          async: false
+            url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
+            dataType: "json",
+            async: false
           }).responseJSON;   
 
 
       var data = new google.visualization.DataTable();
 
       data.addColumn('date', 'Date');
+      data.addColumn('number', 'Buying - Mid');
+      data.addColumn('number', 'Selling - Mid');     
       data.addColumn('number', 'Buying');
       data.addColumn('number', 'Selling');
-
+ 
       var dataSet = [];
 
       for (var i = 0; i < buyingData.length; i++) {
-        dataSet.push([new Date(buyingData[i].rateDate), buyingData[i].price, sellingData[i].price]);
+        dataSet.push([new Date(buyingData[i].rateDate), buyingMid, sellingMid, buyingData[i].price, sellingData[i].price ]);
       }
-
-     // for(datas in jsonData){
-     //    dataSet.push([new Date(jsonData[datas].rateDate), jsonData[datas].price]);
-     //  }
 
       data.addRows(dataSet);
           
@@ -116,8 +174,13 @@
         height: 500,
         vAxis: { gridlines: { count: 4 } ,
                   format: 'decimal'
-                }
-
+                },
+        series: {
+                  0: {color: '#B0B0B0', visibleInLegend: false, lineDashStyle: [20, 20, 10, 10] },
+                  1: {color: '#B0B0B0', visibleInLegend: false, lineDashStyle: [20, 20] },
+                  2: {color: 'green', visibleInLegend: true },
+                  3: {color: 'red', visibleInLegend: true }
+                }        
       };
 
       var chart = new google.charts.Line(document.getElementById('linechart_material'));
@@ -135,6 +198,17 @@
                         dataType: "json",
                         async: false
                       });
+
+      var currName = document.getElementsByName('currencyName').value;
+      var dateAnchor = new Date(Date.now()); 
+      var dateParam = String(dateAnchor.getFullYear()).concat('-',String(dateAnchor.getMonth()+1),'-',String(dateAnchor.getDate()));
+
+      $.ajax({
+        type: "POST",
+        url: "http://localhost:8080/simonExp/currency/CurrencyResource/updateAllHistory?BaseDate="+dateParam,
+        dataType: "json",
+        async: false
+      });      
     }
 
     </script>

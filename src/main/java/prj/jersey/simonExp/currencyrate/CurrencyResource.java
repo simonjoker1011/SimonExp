@@ -243,6 +243,23 @@ public class CurrencyResource {
     }
 
     @POST
+    @Path("updateAllHistory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAllHistory(
+        @QueryParam("BaseDate") String BaseDate) throws ParseException {
+
+        LocalDate today = new LocalDate();
+        try {
+            for (CurrencyType c : CurrencyType.values()) {
+                updateHistory(c.getCurrencyName(), TimeUtil.dateToStr(today));
+            }
+        } catch (Exception e) {
+            return Response.serverError().build();
+        }
+        return Response.ok().build();
+    }
+
+    @POST
     @Path("updateHistory")
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateHistory(
