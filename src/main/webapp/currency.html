@@ -44,10 +44,26 @@
       <!-- TBD -->
       <!-- <input type="radio" name="period" >History -->
     </form>
+    <form>
+      Statics <br>
+      <input type="checkbox" name="statics" value="Mean" checked > Mean
+      <input type="checkbox" name="statics" value="Variance" checked> Variance
+      <input type="checkbox" name="statics" value="Standard Derivation" > Standard Deviation      
+    </form>
 
     <script type="text/javascript">
+
+    var paramMap = {};
+    paramMap['currencyName']='USD';
+    paramMap['period']=30;
+    paramMap['showMean']=false;
+    paramMap['showVariance']=false;
+    paramMap['showStandardDeviation']=false;
+
+
     
     var temp = $("[name=currencyName]:checked").val();
+    var temp2 = $("[name=statics]:checked");
 
     var currName='USD';
     var queryDays =30;
@@ -151,16 +167,14 @@
 
       var data = new google.visualization.DataTable();
 
-      data.addColumn('date', 'Date');
-      data.addColumn('number', 'Buying - Mid');
-      data.addColumn('number', 'Selling - Mid');     
+      data.addColumn('date', 'Date');   
       data.addColumn('number', 'Buying');
       data.addColumn('number', 'Selling');
  
       var dataSet = [];
 
       for (var i = 0; i < buyingData.length; i++) {
-        dataSet.push([new Date(buyingData[i].rateDate), buyingMid, sellingMid, buyingData[i].price, sellingData[i].price ]);
+        dataSet.push([new Date(buyingData[i].rateDate), buyingData[i].price, sellingData[i].price ]);
       }
 
       data.addRows(dataSet);
@@ -176,10 +190,9 @@
                   format: 'decimal'
                 },
         series: {
-                  0: {color: '#B0B0B0', visibleInLegend: false, lineDashStyle: [20, 20, 10, 10] },
-                  1: {color: '#B0B0B0', visibleInLegend: false, lineDashStyle: [20, 20] },
-                  2: {color: 'green', visibleInLegend: true },
-                  3: {color: 'red', visibleInLegend: true }
+
+                  0: {color: 'green', visibleInLegend: true },
+                  1: {color: 'red', visibleInLegend: true }
                 }        
       };
 
