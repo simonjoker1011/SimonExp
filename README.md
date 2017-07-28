@@ -1,21 +1,13 @@
 TODO:
 
 
-0.
-strategies:
-
-1) mean
-2) variance
-3) standard deviation
-
+1.
+tune page behavior: 
+	buying, selling
 
 add curr type: gold
 gold csv url: http://rate.bot.com.tw/gold/csv/2005-01/TWD/0
 
-1.
-Recommand IDEs:
-VSCode
-Atom
 
 2.
 strategy api

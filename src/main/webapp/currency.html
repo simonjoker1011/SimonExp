@@ -56,9 +56,11 @@
     var paramMap = {};
     paramMap['currencyName']='USD';
     paramMap['period']=30;
+    paramMap['showBuying']=true;
+    paramMap['showSelling']=true;
     paramMap['showMean']=false;
     paramMap['showVariance']=false;
-    paramMap['showStandardDeviation']=false;
+    paramMap['showStandardDeviation']=true;
 
 
     
@@ -72,77 +74,76 @@
     var buyingMid=0, sellingMid=0;
 
 
-      $("input[type=radio][name=currencyName]").on("change",function(){
-        currName=$("[name=currencyName]:checked").val(); 
-        getMid(queryDays);       
-            google.charts.load('current', {'packages':['line']});
-            google.charts.setOnLoadCallback(drawChart);
+    $("input[type=radio][name=currencyName]").on("change",function(){
+          currName=$("[name=currencyName]:checked").val(); 
+          google.charts.load('current', {'packages':['line']});
+          google.charts.setOnLoadCallback(drawChart);
 
-      });
-      $("input[type=radio][name=period]").on("change",function(){        
-        queryDays=$("[name=period]:checked").val();
-        getMid(queryDays);
-            google.charts.load('current', {'packages':['line']});
-            google.charts.setOnLoadCallback(drawChart);
-      });
+    });
+    $("input[type=radio][name=period]").on("change",function(){        
+          queryDays=$("[name=period]:checked").val();
+          google.charts.load('current', {'packages':['line']});
+          google.charts.setOnLoadCallback(drawChart);
+    });
 
-    getMid(queryDays);
     google.charts.load('current', {'packages':['line']});
     google.charts.setOnLoadCallback(drawChart);
     
-    function getMid(in_days){
-      var historyDatas = $.ajax({
-            url: "http://localhost:8080/simonExp/currency/CurrencyResource/fetchHistory?CurrencyName="+currName,
-            dataType: "json",
-            async: false
-          }).responseJSON;  
 
-      var buyingSpotHistory, sellingSpotHistory;
 
-      for (var data in historyDatas) {
-        if (historyDatas[data].rate == 'Buying' && historyDatas[data].cashspot == cashSpot) {
-          buyingSpotHistory=historyDatas[data];          
-        }        
-        if (historyDatas[data].rate == 'Selling' && historyDatas[data].cashspot == cashSpot) {
-          sellingSpotHistory=historyDatas[data];          
-        }     
-      }
+    // function getMid(in_days){
+    //   var historyDatas = $.ajax({
+    //         url: "http://localhost:8080/simonExp/currency/CurrencyResource/fetchHistory?CurrencyName="+currName,
+    //         dataType: "json",
+    //         async: false
+    //       }).responseJSON;  
 
-      switch(String(in_days)){
-        case '7':
-          buyingMid=(buyingSpotHistory.weekHigh+buyingSpotHistory.weekLow)/2;
-          sellingMid=(sellingSpotHistory.weekHigh+sellingSpotHistory.weekLow)/2;
-          break;
-        case '30':
-          buyingMid=(buyingSpotHistory.monthHigh+buyingSpotHistory.monthLow)/2;
-          sellingMid=(sellingSpotHistory.monthHigh+sellingSpotHistory.monthLow)/2;
-          break;  
-        case '120':
-          buyingMid=(buyingSpotHistory.seasonHigh+buyingSpotHistory.seasonLow)/2;
-          sellingMid=(sellingSpotHistory.seasonHigh+sellingSpotHistory.seasonLow)/2;
-          break;  
-        case '180':
-          buyingMid=(buyingSpotHistory.halfYearHigh+buyingSpotHistory.halfYearLow)/2;
-          sellingMid=(sellingSpotHistory.halfYearHigh+sellingSpotHistory.halfYearLow)/2;
-          break;  
-        case '365':
-          buyingMid=(buyingSpotHistory.yearHigh+buyingSpotHistory.yearLow)/2;
-          sellingMid=(sellingSpotHistory.yearHigh+sellingSpotHistory.yearLow)/2;
-          break;  
-        case '1460':
-          buyingMid=(buyingSpotHistory.fourYearHigh+buyingSpotHistory.fourYearLow)/2;
-          sellingMid=(sellingSpotHistory.fourYearHigh+sellingSpotHistory.fourYearLow)/2;
-          break;  
-        case '3650':
-          buyingMid=(buyingSpotHistory.decadeHigh+buyingSpotHistory.decadeLow)/2;
-          sellingMid=(sellingSpotHistory.decadeHigh+sellingSpotHistory.decadeLow)/2;
-          break;
-        default :
-          buyingMid=0;
-          sellingMid=0;
-          break;
-      }
-    }
+    //   var buyingSpotHistory, sellingSpotHistory;
+
+    //   for (var data in historyDatas) {
+    //     if (historyDatas[data].rate == 'Buying' && historyDatas[data].cashspot == cashSpot) {
+    //       buyingSpotHistory=historyDatas[data];          
+    //     }        
+    //     if (historyDatas[data].rate == 'Selling' && historyDatas[data].cashspot == cashSpot) {
+    //       sellingSpotHistory=historyDatas[data];          
+    //     }     
+    //   }
+
+    //   switch(String(in_days)){
+    //     case '7':
+    //       buyingMid=(buyingSpotHistory.weekHigh+buyingSpotHistory.weekLow)/2;
+    //       sellingMid=(sellingSpotHistory.weekHigh+sellingSpotHistory.weekLow)/2;
+    //       break;
+    //     case '30':
+    //       buyingMid=(buyingSpotHistory.monthHigh+buyingSpotHistory.monthLow)/2;
+    //       sellingMid=(sellingSpotHistory.monthHigh+sellingSpotHistory.monthLow)/2;
+    //       break;  
+    //     case '120':
+    //       buyingMid=(buyingSpotHistory.seasonHigh+buyingSpotHistory.seasonLow)/2;
+    //       sellingMid=(sellingSpotHistory.seasonHigh+sellingSpotHistory.seasonLow)/2;
+    //       break;  
+    //     case '180':
+    //       buyingMid=(buyingSpotHistory.halfYearHigh+buyingSpotHistory.halfYearLow)/2;
+    //       sellingMid=(sellingSpotHistory.halfYearHigh+sellingSpotHistory.halfYearLow)/2;
+    //       break;  
+    //     case '365':
+    //       buyingMid=(buyingSpotHistory.yearHigh+buyingSpotHistory.yearLow)/2;
+    //       sellingMid=(sellingSpotHistory.yearHigh+sellingSpotHistory.yearLow)/2;
+    //       break;  
+    //     case '1460':
+    //       buyingMid=(buyingSpotHistory.fourYearHigh+buyingSpotHistory.fourYearLow)/2;
+    //       sellingMid=(sellingSpotHistory.fourYearHigh+sellingSpotHistory.fourYearLow)/2;
+    //       break;  
+    //     case '3650':
+    //       buyingMid=(buyingSpotHistory.decadeHigh+buyingSpotHistory.decadeLow)/2;
+    //       sellingMid=(sellingSpotHistory.decadeHigh+sellingSpotHistory.decadeLow)/2;
+    //       break;
+    //     default :
+    //       buyingMid=0;
+    //       sellingMid=0;
+    //       break;
+    //   }
+    // }
 
 
     function drawChart() {
@@ -151,7 +152,9 @@
       var AboveDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * queryDays);
       var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
       var startDate = String(AboveDays.getFullYear()).concat('-',String(AboveDays.getMonth()+1),'-',String(AboveDays.getDate()));
-    
+
+      console.log("date from "+startDate+" to "+endDate);
+
       var buyingData = $.ajax({
             url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
             dataType: "json",
@@ -165,17 +168,51 @@
           }).responseJSON;   
 
 
+      var buyingStatic = getStaticResult(buyingData.map(function(res){
+                    return res.price;
+                  }));
+      var sellingStatic = getStaticResult(sellingData.map(function(res){
+                    return res.price;
+                  }));
+
       var data = new google.visualization.DataTable();
 
       data.addColumn('date', 'Date');   
+
+      if (paramMap['showBuying'] && paramMap['showStandardDeviation']) {
+        data.addColumn('number', 'Buying Upper SD');   
+        // data.addColumn('number', 'Buying Lower SD');   
+      }
+      if (paramMap['showSelling'] && paramMap['showStandardDeviation']) {
+        // data.addColumn('number', 'Selling Upper SD');   
+        data.addColumn('number', 'Selling Lower SD');   
+      }
+
       data.addColumn('number', 'Buying');
       data.addColumn('number', 'Selling');
  
       var dataSet = [];
 
       for (var i = 0; i < buyingData.length; i++) {
-        dataSet.push([new Date(buyingData[i].rateDate), buyingData[i].price, sellingData[i].price ]);
+        var eachData=[new Date(buyingData[i].rateDate), buyingData[i].price, sellingData[i].price];
+        var price=eachData[1];
+
+        if (paramMap['showBuying'] && paramMap['showStandardDeviation']) {
+          eachData.splice(1,0, buyingStatic.ArithMean + buyingStatic.StandardDeviation);
+          // eachData.splice(2,0, buyingStatic.ArithMean - buyingStatic.StandardDeviation);
+        }
+        if (paramMap['showSelling'] && paramMap['showStandardDeviation']) {
+          // eachData.splice(1,0, sellingStatic.ArithMean + buyingStatic.StandardDeviation);
+          eachData.splice(2,0, sellingStatic.ArithMean - buyingStatic.StandardDeviation);
+        }
+        dataSet.push(eachData);
       }
+
+      console.log("Buying ArithMean: "+buyingStatic.ArithMean);
+      console.log("Buying Standard Deviation: "+buyingStatic.StandardDeviation);
+      console.log("Selling ArithMean: "+sellingStatic.ArithMean);
+      console.log("Selling Standard Deviation: "+sellingStatic.StandardDeviation);
+
 
       data.addRows(dataSet);
           
@@ -191,8 +228,8 @@
                 },
         series: {
 
-                  0: {color: 'green', visibleInLegend: true },
-                  1: {color: 'red', visibleInLegend: true }
+                  // 0: {color: 'green', visibleInLegend: true },
+                  // 1: {color: 'red', visibleInLegend: true }
                 }        
       };
 
@@ -224,6 +261,16 @@
       });      
     }
 
+    function getStaticResult(DoubleArrays){            
+      return staticsResult = $.ajax({
+                                type: "POST",
+                                url: "http://localhost:8080/simonExp/currency/StrategyResource",
+                                contentType: 'application/json',
+                                data: JSON.stringify(DoubleArrays),
+                                async: false
+                              }).responseJSON;      
+      console.log(staticsResult);
+    }
     </script>
     <!--Div that will hold the pie chart-->
     <div id="linechart_material"></div>
@@ -231,6 +278,6 @@
     <button onclick="syncHistory()">Sync History</button>
     <p id="syncResult"></p>
     
-
+    
   </body>
 </html>

@@ -1,11 +1,14 @@
 package simonExp;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.math3.stat.descriptive.moment.GeometricMean;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -29,19 +32,24 @@ public class StrategyTest extends JerseyTest {
 
     @Test
     public void test() {
-        List resp = target("StrategyResource").request().get(List.class);
-        resp = new ArrayList<>();
-        System.out.println(resp.size());
+        Response response = target("StrategyResource")
+            .request()
+            .post(Entity.entity(new Float[] { 1.1f, 3.14f, 6.28f, 3.29f }, MediaType.APPLICATION_JSON));
+
+        HashMap<String, Double> rtnMap = response.readEntity(HashMap.class);
+
+        System.out.println("ArithMean: " + rtnMap.get("ArithMean"));
+        System.out.println("StandardDeviation: " + rtnMap.get("StandardDeviation"));
     }
 
     @Test
     public void test2() {
         List<CurrencyData> list = target("CurrencyResource")
             .queryParam("CurrencyName", "USD")
-            .queryParam("Rate", "Buying")
+            .queryParam("Rate", "Selling")
             .queryParam("CashSpot", "Spot")
-            .queryParam("StartDate", "2017-06-01")
-            .queryParam("EndDate", "2017-06-15")
+            .queryParam("StartDate", "2017-03-30")
+            .queryParam("EndDate", "2017-07-27")
             .request().get(new GenericType<List<CurrencyData>>() {
             });
 
