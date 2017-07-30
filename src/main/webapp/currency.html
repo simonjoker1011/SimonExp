@@ -3,7 +3,7 @@
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    
+
   </head>
 
   <body>
@@ -29,15 +29,11 @@
       <input type="radio" name="currencyName" value="KRW" >KRW
     </form>
     <form>
-      <input type="checkbox" name="cachspot" value="Cash"> Cash
-      <input type="checkbox" name="cachspot" value="Spot" checked> Spot
-    </form>
-    <form>
       Period: <br>
       <input type="radio" name="period" value='7' >Week
-      <input type="radio" name="period" value='30' checked="checked">Month      
-      <input type="radio" name="period" value='120'>Season      
-      <input type="radio" name="period" value='180'>Half Year      
+      <input type="radio" name="period" value='30' checked="checked">Month
+      <input type="radio" name="period" value='120'>Season
+      <input type="radio" name="period" value='180'>Half Year
       <input type="radio" name="period" value='365'>Year
       <input type="radio" name="period" value='1460'>4 Years
       <input type="radio" name="period" value='3650'>Decade
@@ -45,13 +41,18 @@
       <!-- <input type="radio" name="period" >History -->
     </form>
     <form>
+      <input type="checkbox" name="buysell" value="showBuying" checked> Buying
+      <input type="checkbox" name="buysell" value="showSelling" checked> Selling
+    </form>
+    <form>
       Statics <br>
-      <input type="checkbox" name="statics" value="Mean" checked > Mean
-      <input type="checkbox" name="statics" value="Variance" checked> Variance
-      <input type="checkbox" name="statics" value="Standard Derivation" > Standard Deviation      
+      <input type="checkbox" name="statics" value="showMean"  > Mean
+      <!-- <input type="checkbox" name="statics" value="showVariance" > Variance -->
+      <input type="checkbox" name="statics" value="showFirstStandardDeviation" > 1st Standard Deviation
+      <input type="checkbox" name="statics" value="showSecondStandardDeviation" > 2ed Standard Deviation
     </form>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
     var paramMap = {};
     paramMap['currencyName']='USD';
@@ -60,12 +61,10 @@
     paramMap['showSelling']=true;
     paramMap['showMean']=false;
     paramMap['showVariance']=false;
-    paramMap['showStandardDeviation']=true;
+    paramMap['showFirstStandardDeviation']=false;
+    paramMap['showSecondStandardDeviation']=false;
 
-
-    
-    var temp = $("[name=currencyName]:checked").val();
-    var temp2 = $("[name=statics]:checked");
+    console.log("Currency Name: "+$("[name=currencyName]:checked").val());
 
     var currName='USD';
     var queryDays =30;
@@ -73,81 +72,51 @@
     var rate='Buying';
     var buyingMid=0, sellingMid=0;
 
-
+// on change: currency name
     $("input[type=radio][name=currencyName]").on("change",function(){
-          currName=$("[name=currencyName]:checked").val(); 
+        currName=$("[name=currencyName]:checked").val();
+        google.charts.load('current', {'packages':['line']});
+        google.charts.setOnLoadCallback(drawChart);
+    });
+// on change: period
+    $("input[type=radio][name=period]").on("change",function(){
+        queryDays=$("[name=period]:checked").val();
+        google.charts.load('current', {'packages':['line']});
+        google.charts.setOnLoadCallback(drawChart);
+    });
+// on change: buysell
+    $("input[type=checkbox][name=buysell]").on("change",function(){
+        paramMap['showBuying']=false;
+        paramMap['showSelling']=false;
+        $("[name=buysell]:checked").each(function(index, element){
+          paramMap[element.value]=true;
+        });
+        if (paramMap['showBuying'] || paramMap['showSelling']) {
           google.charts.load('current', {'packages':['line']});
           google.charts.setOnLoadCallback(drawChart);
-
+        }
     });
-    $("input[type=radio][name=period]").on("change",function(){        
-          queryDays=$("[name=period]:checked").val();
-          google.charts.load('current', {'packages':['line']});
-          google.charts.setOnLoadCallback(drawChart);
-    });
+// on change: statics method
+    $("input[type=checkbox][name=statics]").on("change",function(){
+        paramMap['showMean']=false;
+        paramMap['showVariance']=false;
+        paramMap['showFirstStandardDeviation']=false;
+        paramMap['showSecondStandardDeviation']=false;
+        $("[name=statics]:checked").each(function(index, element){
+          paramMap[element.value]=true;
+        });
+        google.charts.load('current', {'packages':['line']});
+        google.charts.setOnLoadCallback(drawChart);
+    })
+// default
 
-    google.charts.load('current', {'packages':['line']});
-    google.charts.setOnLoadCallback(drawChart);
-    
-
-
-    // function getMid(in_days){
-    //   var historyDatas = $.ajax({
-    //         url: "http://localhost:8080/simonExp/currency/CurrencyResource/fetchHistory?CurrencyName="+currName,
-    //         dataType: "json",
-    //         async: false
-    //       }).responseJSON;  
-
-    //   var buyingSpotHistory, sellingSpotHistory;
-
-    //   for (var data in historyDatas) {
-    //     if (historyDatas[data].rate == 'Buying' && historyDatas[data].cashspot == cashSpot) {
-    //       buyingSpotHistory=historyDatas[data];          
-    //     }        
-    //     if (historyDatas[data].rate == 'Selling' && historyDatas[data].cashspot == cashSpot) {
-    //       sellingSpotHistory=historyDatas[data];          
-    //     }     
-    //   }
-
-    //   switch(String(in_days)){
-    //     case '7':
-    //       buyingMid=(buyingSpotHistory.weekHigh+buyingSpotHistory.weekLow)/2;
-    //       sellingMid=(sellingSpotHistory.weekHigh+sellingSpotHistory.weekLow)/2;
-    //       break;
-    //     case '30':
-    //       buyingMid=(buyingSpotHistory.monthHigh+buyingSpotHistory.monthLow)/2;
-    //       sellingMid=(sellingSpotHistory.monthHigh+sellingSpotHistory.monthLow)/2;
-    //       break;  
-    //     case '120':
-    //       buyingMid=(buyingSpotHistory.seasonHigh+buyingSpotHistory.seasonLow)/2;
-    //       sellingMid=(sellingSpotHistory.seasonHigh+sellingSpotHistory.seasonLow)/2;
-    //       break;  
-    //     case '180':
-    //       buyingMid=(buyingSpotHistory.halfYearHigh+buyingSpotHistory.halfYearLow)/2;
-    //       sellingMid=(sellingSpotHistory.halfYearHigh+sellingSpotHistory.halfYearLow)/2;
-    //       break;  
-    //     case '365':
-    //       buyingMid=(buyingSpotHistory.yearHigh+buyingSpotHistory.yearLow)/2;
-    //       sellingMid=(sellingSpotHistory.yearHigh+sellingSpotHistory.yearLow)/2;
-    //       break;  
-    //     case '1460':
-    //       buyingMid=(buyingSpotHistory.fourYearHigh+buyingSpotHistory.fourYearLow)/2;
-    //       sellingMid=(sellingSpotHistory.fourYearHigh+sellingSpotHistory.fourYearLow)/2;
-    //       break;  
-    //     case '3650':
-    //       buyingMid=(buyingSpotHistory.decadeHigh+buyingSpotHistory.decadeLow)/2;
-    //       sellingMid=(sellingSpotHistory.decadeHigh+sellingSpotHistory.decadeLow)/2;
-    //       break;
-    //     default :
-    //       buyingMid=0;
-    //       sellingMid=0;
-    //       break;
-    //   }
-    // }
-
+        google.charts.load('current', {'packages':['line']});
+        google.charts.setOnLoadCallback(drawChart);
 
     function drawChart() {
-      var dateAnchor = Date.now(); 
+      var optionSeries={}, optionIterator=0;
+
+      var dateAnchor = Date.now();
       var yesterday = new Date(dateAnchor - 1000 * 60 * 60 * 24 );
       var AboveDays = new Date(dateAnchor - 1000 * 60 * 60 * 24 * queryDays);
       var endDate = String(yesterday.getFullYear()).concat('-',String(yesterday.getMonth()+1),'-',String(yesterday.getDate()));
@@ -159,54 +128,120 @@
             url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
             dataType: "json",
             async: false
-          }).responseJSON;   
-
+          }).responseJSON;
       var sellingData = $.ajax({
             url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
             dataType: "json",
             async: false
-          }).responseJSON;   
-
-
+          }).responseJSON;
       var buyingStatic = getStaticResult(buyingData.map(function(res){
                     return res.price;
                   }));
       var sellingStatic = getStaticResult(sellingData.map(function(res){
                     return res.price;
                   }));
-
       var data = new google.visualization.DataTable();
 
-      data.addColumn('date', 'Date');   
-
-      if (paramMap['showBuying'] && paramMap['showStandardDeviation']) {
-        data.addColumn('number', 'Buying Upper SD');   
-        // data.addColumn('number', 'Buying Lower SD');   
-      }
-      if (paramMap['showSelling'] && paramMap['showStandardDeviation']) {
-        // data.addColumn('number', 'Selling Upper SD');   
-        data.addColumn('number', 'Selling Lower SD');   
-      }
-
-      data.addColumn('number', 'Buying');
-      data.addColumn('number', 'Selling');
- 
+      data.addColumn('date', 'Date');
       var dataSet = [];
 
       for (var i = 0; i < buyingData.length; i++) {
-        var eachData=[new Date(buyingData[i].rateDate), buyingData[i].price, sellingData[i].price];
-        var price=eachData[1];
-
-        if (paramMap['showBuying'] && paramMap['showStandardDeviation']) {
-          eachData.splice(1,0, buyingStatic.ArithMean + buyingStatic.StandardDeviation);
-          // eachData.splice(2,0, buyingStatic.ArithMean - buyingStatic.StandardDeviation);
-        }
-        if (paramMap['showSelling'] && paramMap['showStandardDeviation']) {
-          // eachData.splice(1,0, sellingStatic.ArithMean + buyingStatic.StandardDeviation);
-          eachData.splice(2,0, sellingStatic.ArithMean - buyingStatic.StandardDeviation);
-        }
-        dataSet.push(eachData);
+        var subDataSet =[new Date(buyingData[i].rateDate)];
+        dataSet.push(subDataSet);
       }
+
+      if (paramMap['showBuying']) {
+        data.addColumn('number', 'Buying');
+        optionSeries[optionIterator++]={color: 'red', visibleInLegend: true };
+
+        for (var i = 0; i < buyingData.length; i++) {
+          var eachData=dataSet[i];
+          eachData.push(buyingData[i].price);
+          dataSet[i]=eachData;
+        }
+        if (paramMap['showMean']) {
+          data.addColumn('number', 'Buying - Mean');
+          optionSeries[optionIterator++]={color: '#e6e6e6', visibleInLegend: true };
+
+          for (var i = 0; i < buyingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(buyingStatic.ArithMean);
+            dataSet[i]=eachData;
+          }
+        }
+        if (paramMap['showFirstStandardDeviation']) {
+          data.addColumn('number', 'Buying - 1st SD');
+          data.addColumn('number', 'Buying - 1st SD');
+          optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: true };
+          optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: false };
+
+          for (var i = 0; i < buyingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(buyingStatic.ArithMean + buyingStatic.StandardDeviation,
+              buyingStatic.ArithMean - buyingStatic.StandardDeviation);
+            dataSet[i]=eachData;
+          }
+        }
+        if (paramMap['showSecondStandardDeviation']) {
+          data.addColumn('number', 'Buying - 2ed SD');
+          data.addColumn('number', 'Buying - 2ed SD');
+          optionSeries[optionIterator++]={color: '#666666', visibleInLegend: true };
+          optionSeries[optionIterator++]={color: '#666666', visibleInLegend: false };
+          for (var i = 0; i < buyingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(buyingStatic.ArithMean + 2 * buyingStatic.StandardDeviation,
+               buyingStatic.ArithMean - 2 * buyingStatic.StandardDeviation);
+            dataSet[i]=eachData;
+          }
+        }
+      }
+      if (paramMap['showSelling']) {
+        data.addColumn('number', 'Selling');
+        optionSeries[optionIterator++]={color: 'green', visibleInLegend: true };
+
+        for (var i = 0; i < sellingData.length; i++) {
+          var eachData=dataSet[i];
+          eachData.push(sellingData[i].price);
+          dataSet[i]=eachData;
+        }
+        if (paramMap['showMean']) {
+          data.addColumn('number', 'Selling - Mean');
+          optionSeries[optionIterator++]={color: '#e6e6e6', visibleInLegend: true };
+
+          for (var i = 0; i < sellingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(sellingStatic.ArithMean);
+            dataSet[i]=eachData;
+          }
+        }
+        if (paramMap['showFirstStandardDeviation']) {
+          data.addColumn('number', 'Selling - 1st SD');
+          data.addColumn('number', 'Selling - 1st SD');
+          optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: false };
+          optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: true };
+
+          for (var i = 0; i < sellingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(sellingStatic.ArithMean + sellingStatic.StandardDeviation,
+              sellingStatic.ArithMean - sellingStatic.StandardDeviation);
+            dataSet[i]=eachData;
+          }
+        }
+        if (paramMap['showSecondStandardDeviation']) {
+          data.addColumn('number', 'Selling - 2ed SD');
+          data.addColumn('number', 'Selling - 2ed SD');
+          optionSeries[optionIterator++]={color: '#666666', visibleInLegend: false };
+          optionSeries[optionIterator++]={color: '#666666', visibleInLegend: true };
+
+          for (var i = 0; i < sellingData.length; i++) {
+            var eachData=dataSet[i];
+            eachData.push(sellingStatic.ArithMean + 2*sellingStatic.StandardDeviation,
+              sellingStatic.ArithMean - 2*sellingStatic.StandardDeviation);
+            dataSet[i]=eachData;
+          }
+        }
+      }
+
 
       console.log("Buying ArithMean: "+buyingStatic.ArithMean);
       console.log("Buying Standard Deviation: "+buyingStatic.StandardDeviation);
@@ -215,7 +250,7 @@
 
 
       data.addRows(dataSet);
-          
+
       var options = {
         // chart: {
         //   title: 'Box Office Earnings in First Two Weeks of Opening',
@@ -223,14 +258,16 @@
         // },
         width: 900,
         height: 500,
-        vAxis: { gridlines: { count: 4 } ,
+        vAxis: {
+          // gridlines: { count: 4 } ,
                   format: 'decimal'
                 },
-        series: {
-
-                  // 0: {color: 'green', visibleInLegend: true },
-                  // 1: {color: 'red', visibleInLegend: true }
-                }        
+        series:
+        optionSeries
+                // {
+                //   0: {color: 'black', visibleInLegend: true },
+                //   1: {color: 'red', visibleInLegend: true }
+                // }
       };
 
       var chart = new google.charts.Line(document.getElementById('linechart_material'));
@@ -250,7 +287,7 @@
                       });
 
       var currName = document.getElementsByName('currencyName').value;
-      var dateAnchor = new Date(Date.now()); 
+      var dateAnchor = new Date(Date.now());
       var dateParam = String(dateAnchor.getFullYear()).concat('-',String(dateAnchor.getMonth()+1),'-',String(dateAnchor.getDate()));
 
       $.ajax({
@@ -258,26 +295,25 @@
         url: "http://localhost:8080/simonExp/currency/CurrencyResource/updateAllHistory?BaseDate="+dateParam,
         dataType: "json",
         async: false
-      });      
+      });
     }
 
-    function getStaticResult(DoubleArrays){            
+    function getStaticResult(DoubleArrays){
       return staticsResult = $.ajax({
                                 type: "POST",
                                 url: "http://localhost:8080/simonExp/currency/StrategyResource",
                                 contentType: 'application/json',
                                 data: JSON.stringify(DoubleArrays),
                                 async: false
-                              }).responseJSON;      
+                              }).responseJSON;
       console.log(staticsResult);
     }
-    </script>
-    <!--Div that will hold the pie chart-->
+</script>
     <div id="linechart_material"></div>
 
     <button onclick="syncHistory()">Sync History</button>
     <p id="syncResult"></p>
-    
-    
+
+
   </body>
 </html>
