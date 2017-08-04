@@ -1,5 +1,6 @@
 package util;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,13 +14,20 @@ public class HibernateUtil {
 
     private static final SessionFactory sessionFactory = buildSessionFactory();
 
+    public static final String hibernateCfgPath = "/etc/hibernate.cfg.xml";
+
     private static SessionFactory buildSessionFactory() {
         try {
+            File hibernateCfgFile = new File(hibernateCfgPath);
             // Create the SessionFactory from hibernate.cfg.xml
-            return new Configuration().configure().buildSessionFactory();
+            if (hibernateCfgFile.exists()) {
+                return new Configuration().configure(hibernateCfgFile).buildSessionFactory();
+            } else {
+                return new Configuration().configure().buildSessionFactory();
+            }
         } catch (Throwable ex) {
             // Make sure you log the exception, as it might be swallowed
-            System.err.println("Initial SessionFactory creation failed." + ex);
+            System.err.println("Initial SessionFactory creation failed. " + ex);
             throw new ExceptionInInitializerError(ex);
         }
     }

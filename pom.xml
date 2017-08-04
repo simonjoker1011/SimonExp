@@ -98,6 +98,16 @@
 		    <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
 		    <version>2.26-b08</version>
 		</dependency>
+		  <dependency>
+		      <groupId>org.quartz-scheduler</groupId>
+		      <artifactId>quartz</artifactId>
+		      <version>2.2.1</version>
+		  </dependency>
+		  <dependency>
+		      <groupId>org.quartz-scheduler</groupId>
+		      <artifactId>quartz-jobs</artifactId>
+		      <version>2.2.1</version>
+		  </dependency>   
     </dependencies>
     <properties>
         <jersey.version>2.26-b03</jersey.version>

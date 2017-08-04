@@ -1,5 +1,6 @@
 package simonExp;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,11 +17,13 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.hibernate.Session;
 import org.junit.Test;
 
 import prj.jersey.simonExp.currencyrate.CurrencyResource;
 import prj.jersey.simonExp.currencyrate.StrategyResource;
 import prj.jersey.simonExp.datas.CurrencyData;
+import util.HibernateUtil;
 import util.StrategyUtil;
 
 public class StrategyTest extends JerseyTest {
@@ -45,10 +48,10 @@ public class StrategyTest extends JerseyTest {
     @Test
     public void test2() {
         List<CurrencyData> list = target("CurrencyResource")
-            .queryParam("CurrencyName", "USD")
+            .queryParam("CurrencyName", "EUR")
             .queryParam("Rate", "Selling")
             .queryParam("CashSpot", "Spot")
-            .queryParam("StartDate", "2017-03-30")
+            .queryParam("StartDate", "2017-06-28")
             .queryParam("EndDate", "2017-07-27")
             .request().get(new GenericType<List<CurrencyData>>() {
             });
@@ -65,5 +68,23 @@ public class StrategyTest extends JerseyTest {
         System.out.println("Variance: " + new Variance().evaluate(price_arr));
         System.out.println("Standard Deviation: " + new StandardDeviation().evaluate(price_arr));
         System.out.println(StrategyUtil.standardDeviation(prices));
+
+        System.out.println(StrategyUtil.arithmeticMean(prices) - StrategyUtil.standardDeviation(prices));
+    }
+
+    @Test
+    public void test3() {
+
+        File ff = new File("TestFile");
+
+        File f = new File(HibernateUtil.hibernateCfgPath);
+        if (!f.exists()) {
+            System.out.println("no file");
+        } else {
+            System.out.println("file exists");
+        }
+
+        Session session = HibernateUtil.getHibernateSession();
+
     }
 }

@@ -1,5 +1,13 @@
 TODO:
 
+0.
+timer task issues:
+
+a. init 
+b. timers management
+c. timer binds to trigger and tasks
+d. another thread to run the task
+e. when destroy (or stop) the timer
 
 1.
 tune page behavior: 
