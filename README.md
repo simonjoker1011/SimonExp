@@ -25,7 +25,7 @@ lottery api
 
 
 ISSUES to fix:
-
+1. temporary bind all job to MasterTimer
 
 APIs:
 
