@@ -10,15 +10,17 @@ import org.quartz.impl.StdSchedulerFactory;
 import prj.jersey.simonExp.timerTasks.MasterTimerTask;
 import util.SchedulerUtil;
 
-public class CurrencyTimer {
-  
-  public static final String timer_Name = "CURRENCY_TIMER";
+public class MasterTimer {
+
+  public static final String timer_Name = "MASTER_TASK";
+
   public static void init() {
     try {
       Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
-      bindJobs(scheduler);
       scheduler.start();
       SchedulerUtil.schedulers.add(scheduler);
+      
+      bindJobs(scheduler);
     } catch (SchedulerException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -26,8 +28,7 @@ public class CurrencyTimer {
   }
 
   private static void bindJobs(Scheduler scheduler) {
-    SimpleScheduleBuilder scheduleBuilder =
-        SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever();
+    SimpleScheduleBuilder scheduleBuilder = MasterTimerTask.getSchedule();
     JobDetail jobDetail =
         SchedulerUtil.constructJob(MasterTimerTask.class, MasterTimerTask.job_Name);
     Trigger trigger = SchedulerUtil.constructTrigger(scheduleBuilder, MasterTimerTask.trigger_Name);
