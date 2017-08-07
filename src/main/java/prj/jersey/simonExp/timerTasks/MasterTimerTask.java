@@ -24,7 +24,7 @@ public class MasterTimerTask implements Job, Runnable {
     }
 
     public static SimpleScheduleBuilder getSchedule() {
-        return SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever();
+        return SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(1).repeatForever();
         // return SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever();
     }
 

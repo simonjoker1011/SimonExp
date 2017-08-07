@@ -94,7 +94,7 @@ public class CurrencyResource {
     @POST
     @Path("savePeriodCurrency")
     @Produces(MediaType.TEXT_PLAIN)
-    public String savePeriodCurrency(
+    public static String savePeriodCurrency(
         @QueryParam("startdate") String startDate,
         @QueryParam("enddate") String endDate) throws ParseException {
 
@@ -111,7 +111,7 @@ public class CurrencyResource {
     @POST
     @Path("updateTilToday")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateTilToday() {
+    public static Response updateTilToday() {
 
         Session session = null;
         session = HibernateUtil.getHibernateSession();
@@ -305,7 +305,7 @@ public class CurrencyResource {
         return Response.ok(rtninfo).build();
     }
 
-    private String fetchNprocessCsvFile(String parseDate) {
+    private static String fetchNprocessCsvFile(String parseDate) {
         CSVReader reader = null;
         File file = new File("csvfile");
         String fileUrl = botcsvUrl + parseDate + postfixLang;

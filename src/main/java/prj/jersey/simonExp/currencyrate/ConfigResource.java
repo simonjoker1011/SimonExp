@@ -31,8 +31,10 @@ public class ConfigResource {
 
         if (scheduler.getJobDetail(jobKey) != null) {
             scheduler.deleteJob(jobKey);
+            System.out.println("Switch Off!");
         } else {
             scheduler.scheduleJob(CurrencyInfoTask.getJob(), CurrencyInfoTask.getTrigger());
+            System.out.println("Switch On!");
         }
         return Response.ok().build();
     }

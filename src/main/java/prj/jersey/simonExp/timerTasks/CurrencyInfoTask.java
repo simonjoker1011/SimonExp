@@ -2,13 +2,14 @@ package prj.jersey.simonExp.timerTasks;
 
 import java.util.Date;
 
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 
+import prj.jersey.simonExp.currencyrate.CurrencyResource;
 import util.SchedulerUtil;
 
 public class CurrencyInfoTask implements Job, Runnable {
@@ -21,13 +22,15 @@ public class CurrencyInfoTask implements Job, Runnable {
         run();
     }
 
-    public static SimpleScheduleBuilder getSchedule() {
-        return SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(5).repeatForever();
+    public static CronScheduleBuilder getSchedule() {
+        String exp = "0 0 0 1/1 * ? *";
+
+        return CronScheduleBuilder.cronSchedule(exp);
         // return SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(1).repeatForever();
     }
 
     public static JobDetail getJob() {
-        return SchedulerUtil.constructJob(MasterTimerTask.class, job_Name);
+        return SchedulerUtil.constructJob(CurrencyInfoTask.class, job_Name);
     }
 
     public static Trigger getTrigger() {
@@ -36,6 +39,7 @@ public class CurrencyInfoTask implements Job, Runnable {
 
     @Override
     public void run() {
-        System.out.println("Say hi at: " + new Date().toString());
+        System.out.println("Currency timer fired at: " + new Date().toString());
+        CurrencyResource.updateTilToday();
     }
 }
