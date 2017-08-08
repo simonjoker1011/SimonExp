@@ -53,7 +53,7 @@
     </form>
 
 <script type="text/javascript">
-
+    var requestUrl="http://localhost:8080/simonExp"
     var paramMap = {};
     paramMap['currencyName']='USD';
     paramMap['period']=30;
@@ -125,12 +125,12 @@
       console.log("date from "+startDate+" to "+endDate);
 
       var buyingData = $.ajax({
-            url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
+            url: requestUrl + "/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Buying&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
             dataType: "json",
             async: false
           }).responseJSON;
       var sellingData = $.ajax({
-            url: "http://localhost:8080/simonExp/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
+            url: requestUrl + "/currency/CurrencyResource?CurrencyName="+currName+"&Rate=Selling&CashSpot=Spot&StartDate="+startDate+"&EndDate="+endDate,
             dataType: "json",
             async: false
           }).responseJSON;
@@ -281,7 +281,7 @@
 
       var syncResp = $.ajax({
                         type: "POST",
-                        url: "http://localhost:8080/simonExp/currency/CurrencyResource/updateTilToday",
+                        url: requestUrl + "/currency/CurrencyResource/updateTilToday",
                         dataType: "json",
                         async: false
                       });
@@ -292,7 +292,7 @@
 
       $.ajax({
         type: "POST",
-        url: "http://localhost:8080/simonExp/currency/CurrencyResource/updateAllHistory?BaseDate="+dateParam,
+        url: requestUrl + "/currency/CurrencyResource/updateAllHistory?BaseDate="+dateParam,
         dataType: "json",
         async: false
       });
@@ -301,7 +301,7 @@
     function getStaticResult(DoubleArrays){
       return staticsResult = $.ajax({
                                 type: "POST",
-                                url: "http://localhost:8080/simonExp/currency/StrategyResource",
+                                url: requestUrl + "/currency/StrategyResource",
                                 contentType: 'application/json',
                                 data: JSON.stringify(DoubleArrays),
                                 async: false
