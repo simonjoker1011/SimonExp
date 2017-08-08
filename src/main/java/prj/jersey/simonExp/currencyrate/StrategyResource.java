@@ -1,5 +1,6 @@
 package prj.jersey.simonExp.currencyrate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,4 +28,25 @@ public class StrategyResource {
 
         return Response.ok().entity(rtnMap).build();
     }
+
+    @POST
+    @Path("accumulated")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAccumulatedStatics(
+        List<Float> prices) {
+        HashMap<String, List<Double>> rtnMap = new HashMap<>();
+        List<Double> arithmeans = new ArrayList<>();
+        List<Double> standarddeviations = new ArrayList<>();
+
+        for (int i = 0; i < prices.size(); i++) {
+            List<Float> subprices = prices.subList(0, i + 1);
+            arithmeans.add(StrategyUtil.arithmeticMean(subprices));
+            standarddeviations.add(StrategyUtil.standardDeviation(subprices));
+        }
+
+        rtnMap.put("accuMean", arithmeans);
+        rtnMap.put("accuSD", standarddeviations);
+        return Response.ok().entity(rtnMap).build();
+    }
+
 }

@@ -134,12 +134,20 @@
             dataType: "json",
             async: false
           }).responseJSON;
-      var buyingStatic = getStaticResult(buyingData.map(function(res){
+
+      var buyingAccuDatas = getAccuStaticResult(buyingData.map(function(res){
                     return res.price;
                   }));
-      var sellingStatic = getStaticResult(sellingData.map(function(res){
+      var sellingAccuDatas = getAccuStaticResult(sellingData.map(function(res){
                     return res.price;
                   }));
+
+      // var buyingStatic = getStaticResult(buyingData.map(function(res){
+      //               return res.price;
+      //             }));
+      // var sellingStatic = getStaticResult(sellingData.map(function(res){
+      //               return res.price;
+      //             }));
       var data = new google.visualization.DataTable();
 
       data.addColumn('date', 'Date');
@@ -163,9 +171,9 @@
           data.addColumn('number', 'Buying - Mean');
           optionSeries[optionIterator++]={color: '#e6e6e6', visibleInLegend: true };
 
-          for (var i = 0; i < buyingData.length; i++) {
+          for (var i = 0; i < buyingAccuDatas.accuMean.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(buyingStatic.ArithMean);
+            eachData.push(buyingAccuDatas.accuMean[i]);
             dataSet[i]=eachData;
           }
         }
@@ -175,10 +183,10 @@
           optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: true };
           optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: false };
 
-          for (var i = 0; i < buyingData.length; i++) {
+          for (var i = 0; i < buyingAccuDatas.accuSD.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(buyingStatic.ArithMean + buyingStatic.StandardDeviation,
-              buyingStatic.ArithMean - buyingStatic.StandardDeviation);
+            eachData.push(buyingAccuDatas.accuMean[i] + buyingAccuDatas.accuSD[i],
+              buyingAccuDatas.accuMean[i] - buyingAccuDatas.accuSD[i]);
             dataSet[i]=eachData;
           }
         }
@@ -187,10 +195,10 @@
           data.addColumn('number', 'Buying - 2ed SD');
           optionSeries[optionIterator++]={color: '#666666', visibleInLegend: true };
           optionSeries[optionIterator++]={color: '#666666', visibleInLegend: false };
-          for (var i = 0; i < buyingData.length; i++) {
+          for (var i = 0; i < buyingAccuDatas.accuSD.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(buyingStatic.ArithMean + 2 * buyingStatic.StandardDeviation,
-               buyingStatic.ArithMean - 2 * buyingStatic.StandardDeviation);
+            eachData.push(buyingAccuDatas.accuMean[i] + 2*buyingAccuDatas.accuSD[i],
+              buyingAccuDatas.accuMean[i] - 2*buyingAccuDatas.accuSD[i]);
             dataSet[i]=eachData;
           }
         }
@@ -208,9 +216,9 @@
           data.addColumn('number', 'Selling - Mean');
           optionSeries[optionIterator++]={color: '#e6e6e6', visibleInLegend: true };
 
-          for (var i = 0; i < sellingData.length; i++) {
+          for (var i = 0; i < sellingAccuDatas.accuMean.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(sellingStatic.ArithMean);
+            eachData.push(sellingAccuDatas.accuMean[i]);
             dataSet[i]=eachData;
           }
         }
@@ -220,10 +228,10 @@
           optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: false };
           optionSeries[optionIterator++]={color: '#b3b3b3', visibleInLegend: true };
 
-          for (var i = 0; i < sellingData.length; i++) {
+          for (var i = 0; i < sellingAccuDatas.accuMean.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(sellingStatic.ArithMean + sellingStatic.StandardDeviation,
-              sellingStatic.ArithMean - sellingStatic.StandardDeviation);
+            eachData.push(sellingAccuDatas.accuMean[i] + sellingAccuDatas.accuSD[i],
+              sellingAccuDatas.accuMean[i] - sellingAccuDatas.accuSD[i]);
             dataSet[i]=eachData;
           }
         }
@@ -233,20 +241,20 @@
           optionSeries[optionIterator++]={color: '#666666', visibleInLegend: false };
           optionSeries[optionIterator++]={color: '#666666', visibleInLegend: true };
 
-          for (var i = 0; i < sellingData.length; i++) {
+          for (var i = 0; i < sellingAccuDatas.accuMean.length; i++) {
             var eachData=dataSet[i];
-            eachData.push(sellingStatic.ArithMean + 2*sellingStatic.StandardDeviation,
-              sellingStatic.ArithMean - 2*sellingStatic.StandardDeviation);
+            eachData.push(sellingAccuDatas.accuMean[i] + 2*sellingAccuDatas.accuSD[i],
+              sellingAccuDatas.accuMean[i] - 2*sellingAccuDatas.accuSD[i]);
             dataSet[i]=eachData;
           }
         }
       }
 
 
-      console.log("Buying ArithMean: "+buyingStatic.ArithMean);
-      console.log("Buying Standard Deviation: "+buyingStatic.StandardDeviation);
-      console.log("Selling ArithMean: "+sellingStatic.ArithMean);
-      console.log("Selling Standard Deviation: "+sellingStatic.StandardDeviation);
+      // console.log("Buying ArithMean: "+buyingStatic.ArithMean);
+      // console.log("Buying Standard Deviation: "+buyingStatic.StandardDeviation);
+      // console.log("Selling ArithMean: "+sellingStatic.ArithMean);
+      // console.log("Selling Standard Deviation: "+sellingStatic.StandardDeviation);
 
 
       data.addRows(dataSet);
@@ -302,6 +310,17 @@
       return staticsResult = $.ajax({
                                 type: "POST",
                                 url: requestUrl + "/currency/StrategyResource",
+                                contentType: 'application/json',
+                                data: JSON.stringify(DoubleArrays),
+                                async: false
+                              }).responseJSON;
+      console.log(staticsResult);
+    }
+
+    function getAccuStaticResult(DoubleArrays){
+      return staticsResult = $.ajax({
+                                type: "POST",
+                                url: requestUrl + "/currency/StrategyResource/accumulated",
                                 contentType: 'application/json',
                                 data: JSON.stringify(DoubleArrays),
                                 async: false
