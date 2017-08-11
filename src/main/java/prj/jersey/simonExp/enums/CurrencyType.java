@@ -20,7 +20,8 @@ public enum CurrencyType {
     EUR(Currency.getInstance("EUR").getNumericCode(), Currency.getInstance("EUR").getCurrencyCode()),
     MYR(Currency.getInstance("MYR").getNumericCode(), Currency.getInstance("MYR").getCurrencyCode()),
     KRW(Currency.getInstance("KRW").getNumericCode(), Currency.getInstance("KRW").getCurrencyCode()),
-    TWD(Currency.getInstance("TWD").getNumericCode(), Currency.getInstance("TWD").getCurrencyCode());
+    TWD(Currency.getInstance("TWD").getNumericCode(), Currency.getInstance("TWD").getCurrencyCode()),
+    GOLD(Currency.getInstance("Gold").getNumericCode(), Currency.getInstance("Gold").getCurrencyCode());
 
     private final Integer currencyCode;
     private final String currencyName;
